@@ -40,7 +40,7 @@ exports.handler = async function(event) {
     return error('Missing parameters');
   }
 
-  const destFileName = `${appchainId}/chain-spec${isRaw == 1 ? '-raw' : ''}.json`;
+  const destFileName = `${appchain}/chain-spec${raw == 1 ? '-raw' : ''}.json`;
 
   const file = myBucket.file(destFileName);
 
