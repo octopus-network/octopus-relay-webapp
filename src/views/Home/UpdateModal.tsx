@@ -1,6 +1,6 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useState } from "react";
 
-import { Button, Modal, Form, Input, Spin, Radio, Upload, message } from "antd";
+import { Button, Modal, Form, Input, Radio, Upload, message } from "antd";
 
 import { UploadOutlined } from "@ant-design/icons";
 
@@ -16,14 +16,18 @@ function UpdateModal({ visible, onCancel, onOk, appchainId }): React.ReactElemen
     const formData = new FormData();
     formData.append('file', chainSpec.file);
 
-    axios.post(`/upload/chainspec/${appchainId}${raw == 1 ? '/raw' : ''}`, formData, {
+    axios.post(`/.netlify/functions/upload?appchain=${appchainId}&raw=${raw}`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
       }
     })
       .then(res => {
-        const { link } = res.data;
-        onOk({ chainSpec: link, chainSpecHash });
+        const { success, data, message } = res.data;
+        if (success == true) {
+          onOk({ chainSpec: data.link, chainSpecHash });
+        } else {
+          throw new Error(message || 'Unknown error.')
+        }
       })
       .catch(err => {
         setIsSubmiting(false);
