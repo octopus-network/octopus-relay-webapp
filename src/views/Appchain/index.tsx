@@ -146,7 +146,7 @@ function Appchain(): React.ReactElement {
             <Descriptions.Item label="Appchain Name">{appchain.appchain_name}</Descriptions.Item>
             <Descriptions.Item label="Founder">{appchain.founder_id}</Descriptions.Item>
             <Descriptions.Item label="Chain Spec">
-              <a href={appchain.chain_spec_url} target="_blank">{appchain.chain_spec_url.substr(0, 20)}...{appchain.chain_spec_url.substr(-20)}</a>
+              <a href={appchain.chain_spec_url} target="_blank" >Download</a>
             </Descriptions.Item>
             <Descriptions.Item label="Chain Spec Hash">{appchain.chain_spec_hash}</Descriptions.Item>
             <Descriptions.Item label="Bond Tokens">{appchain.bond_tokens} <TokenBadge /></Descriptions.Item>

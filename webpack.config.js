@@ -7,7 +7,6 @@ const baseConfig = require('./webpack.base.config');
 
 const ENV = process.env.NODE_ENV || 'development';
 const context = __dirname;
-const hasPublic = fs.existsSync(path.join(context, 'public'));
 
 const NETWORK = process.env.OCT_NETWORK || 'testnet';
 const RELAY_CONTRACT_NAME = process.env.OCT_RELAY_CONTRACT_NAME || process.env.CONTRACT_NAME || 'dev-1617522041326-1812977';

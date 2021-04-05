@@ -208,10 +208,11 @@ function Home(): React.ReactElement {
   }
 
   const onUpdate = function(values) {
-    const { chainSpec, chainSpecHash } = values;
+    const { chainSpec, chainSpecHash, id } = values;
+ 
     window.contract.update_appchain(
       {
-        appchain_id: appchainId,
+        appchain_id: id,
         chain_spec_url: chainSpec,
         chain_spec_hash: chainSpecHash
       },
@@ -220,7 +221,8 @@ function Home(): React.ReactElement {
     ).then(() => {
       window.location.reload();
     }).catch(err => {
-      message.error(err.toString);
+      setUpdateModalVisible(false);
+      message.error(err.toString());
     })
   }
 

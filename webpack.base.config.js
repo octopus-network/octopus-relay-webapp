@@ -185,6 +185,7 @@ function createWebpack (ENV, context) {
     performance: {
       hints: false
     },
+    
     plugins: plugins.concat([
       new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/),
       new webpack.DefinePlugin({
