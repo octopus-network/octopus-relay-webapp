@@ -1,5 +1,7 @@
 # Octopus Relay Webapp
 
+[![Netlify Status](https://api.netlify.com/api/v1/badges/a62ea403-951b-43c4-a8c0-73fe8745565c/deploy-status)](https://app.netlify.com/sites/vigilant-mcclintock-590240/deploys)
+
 Octopus Relay is part of the Octopus Network.
 
 This is the Webapp, you can also follow the [Smart Contract](https://github.com/octopus-network/octopus-relay-contract.git).

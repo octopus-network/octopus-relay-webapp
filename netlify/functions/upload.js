@@ -30,13 +30,13 @@ function success(data) {
 exports.handler = async function(event) {
   const { isBase64Encoded, body, httpMethod, queryStringParameters } = event;
 
-  const { appchainId, isRaw } = queryStringParameters;
+  const { appchain, raw } = queryStringParameters;
   
   if (!/post/i.test(httpMethod)) {
     return error('Method not support');
   }
 
-  if (!appchainId || !isRaw) {
+  if (!appchain || !raw) {
     return error('Missing parameters');
   }
 
