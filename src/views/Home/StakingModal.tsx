@@ -14,7 +14,6 @@ function StakingModal({ visible, appchainId, onCancel }): React.ReactElement {
   const [isSubmiting, setIsSubmiting] = useState<boolean>();
   const [unstakingLoading, setUnstakingLoading] = useState<boolean>(false);
 
-
   const [accountBalance, setAccountBalance] = useState(0);
   const [stakingAmount, setStakingAmount] = useState(0);
 
@@ -31,21 +30,24 @@ function StakingModal({ visible, appchainId, onCancel }): React.ReactElement {
   useEffect(() => {
     if (!visible) return;
     setAppchainLoading(true);
-    window.contract
-      .get_appchain({ appchain_id: appchainId }).then((appchain) => {
+    Promise.all([
+        window.contract.get_appchain({ appchain_id: appchainId }),
+        window.contract.get_minium_staking_amount()
+      ]).then(([appchain, amount]) => {
         setAppchain(appchain);
         setAppchainLoading(false);
-        form.setFieldsValue({ stakingAmount: appchain.minium_staking_amount });
-        setStakingAmount(appchain.minium_staking_amount);
+        console.log(appchain);
+        form.setFieldsValue({ stakingAmount: amount });
+        setStakingAmount(amount);
       }).catch(err => {
         setAppchainLoading(false);
         message.error(err.toString());
       });
 
-  }, [visible]);
+  }, [visible, appchainId]);
 
   const onStaking = function(values) {
-    const { appchainId, validatorId, stakingAmount } = values;
+    const { validatorId, stakingAmount } = values;
     setIsSubmiting(true);
     window.tokenContract.ft_transfer_call(
       {
@@ -108,35 +110,27 @@ function StakingModal({ visible, appchainId, onCancel }): React.ReactElement {
       {
         appchain?.validators.some(v => v.account_id == window.accountId) ?
         <div>
-          <Form onFinish={onStakingMore} labelCol={{ span: 8 }} wrapperCol={{ span: 16 }} 
-            initialValues={{ appchainId }} form={form}>
-              <Form.Item name="appchainId" label="Appchain Id">
-                <Input disabled />
-              </Form.Item>
-              <Form.Item name="stakingAmount" label="Staking Amount" extra={
-                accountBalance < stakingAmount &&
-                <Alert message="insufficient balance" type="warning" showIcon 
-                  style={{ padding: '10px 0', border: 'none', background: '#fff' }} />
-              }>
-                <Input placeholder="The amount you want to staking for" type="number" addonAfter={<TokenBadge />}
-                  onChange={e => setStakingAmount(e.target.value as any)} />
-              </Form.Item>
-              <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
-                <Button type="primary" htmlType="submit" loading={isSubmiting}>Staking More</Button>
-                <span style={{ margin: "0 10px", color: "#9c9c9c" }}> Or </span>
-                <Popconfirm onConfirm={() => unstaking(appchain.id)} title="Are you sure to unstaking?">
-                  <Button type="ghost" loading={unstakingLoading}>Unstaking</Button>
-                </Popconfirm>
-              </Form.Item>
+          <Form onFinish={onStakingMore} labelCol={{ span: 8 }} wrapperCol={{ span: 16 }} form={form}>
+            <Form.Item name="stakingAmount" label="Staking Amount" extra={
+              accountBalance < stakingAmount &&
+              <Alert message="insufficient balance" type="warning" showIcon 
+                style={{ padding: '10px 0', border: 'none', background: '#fff' }} />
+            }>
+              <Input size="large" placeholder="The amount you want to staking for" type="number" addonAfter={<TokenBadge />}
+                onChange={e => setStakingAmount(e.target.value as any)} />
+            </Form.Item>
+            <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
+              <Button type="primary" htmlType="submit" loading={isSubmiting} size="large">Staking More</Button>
+              <span style={{ margin: "0 10px", color: "#9c9c9c" }}> Or </span>
+              <Popconfirm onConfirm={() => unstaking(appchain.id)} title="Are you sure to unstaking?">
+                <Button type="ghost" loading={unstakingLoading} size="large">Unstaking</Button>
+              </Popconfirm>
+            </Form.Item>
           </Form>
         </div> :
-        <Form onFinish={onStaking} labelCol={{ span: 8 }} wrapperCol={{ span: 16 }} 
-          initialValues={{ stakingAmount: 100, appchainId }}>
-          <Form.Item name="appchainId" label="Appchain Id">
-            <Input disabled />
-          </Form.Item>
+        <Form onFinish={onStaking} labelCol={{ span: 8 }} wrapperCol={{ span: 16 }} form={form}>
           <Form.Item name="validatorId" label="Validator Id">
-            <Input placeholder="please input your validator id"/>
+            <Input placeholder="please input your validator id" size="large" />
           </Form.Item>
           <Form.Item name="stakingAmount" label="Staking Amount" extra={
             accountBalance < stakingAmount &&
@@ -144,10 +138,10 @@ function StakingModal({ visible, appchainId, onCancel }): React.ReactElement {
               style={{ padding: '10px 0', border: 'none', background: '#fff' }} />
           }>
             <Input placeholder="The amount you want to staking for" type="number" addonAfter={<TokenBadge />} 
-              onChange={e => setStakingAmount(e.target.value as any)} />
+              onChange={e => setStakingAmount(e.target.value as any)} size="large" />
           </Form.Item>
           <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
-            <Button type="primary" htmlType="submit" loading={isSubmiting}>Staking</Button>
+            <Button type="primary" htmlType="submit" loading={isSubmiting} size="large">Staking</Button>
           </Form.Item>
         </Form>
 

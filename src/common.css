@@ -21,6 +21,11 @@ body {
   margin: 0;
   padding: 0;
 }
+
+p {
+  margin: 0!important;
+}
+
 .container {
   max-width: 920px;
   margin: 0 auto;
@@ -39,4 +44,22 @@ body {
 
 .ant-table-tbody > tr {
   cursor: pointer;
+}
+
+.ant-dropdown-menu-item {
+  padding: 10px 20px!important;
+  position: relative;
+}
+.ant-dropdown-menu-item:not(:last-child):after {
+  content: '';
+  height: 1px;
+  background: #eee;
+  position: absolute;
+  right: 0;
+  left: 10px;
+  bottom: 0;
+  width: auto;
+}
+.ant-dropdown-menu {
+  box-shadow: rgb(0 0 0 / 10%) 0px 3px 12px -1px!important;
 }

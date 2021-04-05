@@ -11,6 +11,7 @@ declare global {
   interface Window {
     accountId: string;
     contractName: string;
+    tokenContractName: string;
     walletConnection: any;
     contract: any;
     tokenContract: any;

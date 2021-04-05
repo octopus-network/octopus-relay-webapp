@@ -5,6 +5,7 @@ import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import Main from './views/Main';
 
 import Home from './views/Home';
+import Wallet from './views/Wallet';
 import Appchain from './views/Appchain';
 
 function App(): React.ReactElement {
@@ -15,6 +16,7 @@ function App(): React.ReactElement {
           <Route path='/' element={<Main />}>
             <Route path='' element={<Navigate to='home' />} />
             <Route path='home' element={<Home />} />
+            <Route path='wallet' element={<Wallet />} />
             <Route path='appchain/:id' element={<Appchain />} />
           </Route>
           

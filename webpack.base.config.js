@@ -111,7 +111,7 @@ function createWebpack (ENV, context) {
                     '@border-radius-base': '3px',
                     '@border-color-base': '#e8e8e8',
                     '@btn-border-radius-base': '20px',
-                    '@nput-border-color': '#d8d8d8'
+                    '@input-border-color': '#d8d8d8'
                   },
                   javascriptEnabled: true
                 }

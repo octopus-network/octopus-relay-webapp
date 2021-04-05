@@ -31,7 +31,7 @@ function RegisterModal({ visible, onCancel, onOk }): React.ReactElement {
       <Form onFinish={onFinish} labelCol={{ span: 8 }} wrapperCol={{ span: 16 }} 
         initialValues={{ bondTokenAmount: miniumBondTokenAmount }}>
         <Form.Item name="appchainName" label="Appchain Name">
-          <Input placeholder="please input the appchain name."/>
+          <Input placeholder="please input the appchain name." size="large" />
         </Form.Item>
         <Form.Item name="bondTokenAmount" label="Bond Token" extra={
           accountBalance < bondTokenAmount &&
@@ -39,10 +39,10 @@ function RegisterModal({ visible, onCancel, onOk }): React.ReactElement {
             style={{ padding: '10px 0', border: 'none', background: '#fff' }} />
         }>
           <Input placeholder="The amount you want to stake for your chain" onChange={e => setBondTokenAmount(e.target.value as any)}
-            type="number" addonAfter={<TokenBadge />} />
+            type="number" addonAfter={<TokenBadge />} size="large" />
         </Form.Item>
         <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
-          <Button type="primary" htmlType="submit" loading={isSubmiting}>Register</Button>
+          <Button type="primary" htmlType="submit" loading={isSubmiting} size="large">Register</Button>
         </Form.Item>
       </Form>
     </Modal>

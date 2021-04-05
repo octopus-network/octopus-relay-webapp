@@ -15,6 +15,7 @@ export async function initContract() {
   window.accountId = window.walletConnection.getAccountId()
 
   window.contractName = nearConfig.contractName
+  window.tokenContractName = nearConfig.tokenContract
 
   // Initializing our contract APIs by contract name and configuration
   window.contract = await new Contract(window.walletConnection.account(), nearConfig.contractName, {
@@ -29,7 +30,7 @@ export async function initContract() {
 
   window.tokenContract = await new Contract(window.walletConnection.account(), nearConfig.tokenContract, {
     viewMethods: [ 'ft_balance_of' ],
-    changeMethods: ['ft_transfer_call'],
+    changeMethods: [ 'ft_transfer_call', 'ft_transfer' ],
   })
 }
 
