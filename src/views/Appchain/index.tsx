@@ -89,7 +89,7 @@ function Appchain(): React.ReactElement {
   const getValidators = function(idx) {
    
     setIsLoadingValidators(true);
-    window.contract.get_validator_set({ appchain_id: appchain.id, index: idx })
+    window.contract.get_validator_set({ appchain_id: appchain.id, seq_num: idx })
       .then(set => {
         setIsLoadingValidators(false);
         setValidatorSet(set);

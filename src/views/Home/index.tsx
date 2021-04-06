@@ -25,6 +25,8 @@ function Home(): React.ReactElement {
   const [isLoadingList, setIsLoadingList] = useState<boolean>(false);
   const [isLoadingOverview, setIsLoadingOverview] = useState<boolean>(false);
 
+  const [isAdmin, setIsAdmin] = useState<boolean>(false);
+
   const [registerModalVisible, setRegisterModalVisible] = useState<boolean>(false);
   const [stakingModalVisible, setStakingModalVisible] = useState<boolean>(false);
   const [updateModalVisible, setUpdateModalVisible] = useState<boolean>(false);
@@ -36,7 +38,7 @@ function Home(): React.ReactElement {
 
   const [appchains, setAppchains] = useState<any[]>();
 
-  const [activing, setActiving] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const [appchainId, setAppchainId] = useState<number>(0);
 
@@ -88,19 +90,27 @@ function Home(): React.ReactElement {
             {
               window.accountId &&
               (
+
+                isAdmin ?
+               
+                status == 'Frozen' ?
+                <Button type='primary' onClick={() => activeAppchain(fields.id)}>
+                  Active
+                </Button> : (
+                  status == 'Active' ?
+                  <Button type='ghost' onClick={() => freezeAppchain(fields.id)}>
+                    Freeze
+                  </Button> : null
+                ) :
+          
                 window.accountId == founder_id ?
                 (
-                  status == "Frozen" ?
-                  <Button type="primary" onClick={() => activeAppchain(fields.id)} loading={activing}>
-                    Active
-                  </Button> :
-                  (
-                    status == "InProgress" ?
-                    <Button type="primary" onClick={() => updateAppchain(fields.id)} loading={activing}>
-                      Update
-                    </Button> : null
-                  )
+                  status == 'InProgress' ?
+                  <Button type='primary' onClick={() => updateAppchain(fields.id)}>
+                    Update
+                  </Button> : null
                 ) :
+
                 <Button onClick={() => { setAppchainId(fields.id); toggleStakingModalVisible(); }} type="ghost">Staking</Button>
              
               )
@@ -166,6 +176,15 @@ function Home(): React.ReactElement {
   useEffect(() => {
     getAppchains();
 
+    // check current account is admin or not
+    if (window.accountId) {
+      window.contract?.get_owner().then(owner => {
+        if (window.accountId == owner) {
+          setIsAdmin(true);
+        }
+      });
+    }
+
     let timer = setInterval(() => {
       if (isFetching) return false;
       setIsFetching(true);
@@ -227,7 +246,7 @@ function Home(): React.ReactElement {
   }
 
   const activeAppchain = function(appchainId) {
-    setActiving(true);
+    setIsLoading(true);
     window.contract.active_appchain(
       {
         appchain_id: appchainId,
@@ -235,10 +254,25 @@ function Home(): React.ReactElement {
       BOATLOAD_OF_GAS,
       0
     ).then(() => {
-      setActiving(false);
       window.location.reload();
     }).catch((err) => {
-      setActiving(false);
+      setIsLoading(false);
+      message.error(err.toString());
+    });
+  }
+
+  const freezeAppchain = function(appchainId) {
+    setIsLoading(true);
+    window.contract.freeze_appchain(
+      {
+        appchain_id: appchainId,
+      },
+      BOATLOAD_OF_GAS,
+      0
+    ).then(() => {
+      window.location.reload();
+    }).catch((err) => {
+      setIsLoading(false);
       message.error(err.toString());
     });
   }
@@ -268,7 +302,7 @@ function Home(): React.ReactElement {
           isSignedIn &&
           <Button type="primary" onClick={toggleRegisterModalVisible} icon={<PlusOutlined />}>Register</Button>
         } bordered={false}>
-          <Table rowKey={(record) => record.id} columns={columns} loading={isLoadingList} 
+          <Table rowKey={(record) => record.id} columns={columns} loading={isLoadingList || isLoading} 
             dataSource={appchains} onRow={record => {
               return {
                 onClick: event => navigate(`/appchain/${record.id}`)
