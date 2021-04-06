@@ -29,8 +29,8 @@ export async function initContract() {
   })
 
   window.tokenContract = await new Contract(window.walletConnection.account(), nearConfig.tokenContract, {
-    viewMethods: [ 'ft_balance_of' ],
-    changeMethods: [ 'ft_transfer_call', 'ft_transfer' ],
+    viewMethods: [ 'ft_balance_of', 'storage_balance_of' ],
+    changeMethods: [ 'ft_transfer_call', 'ft_transfer', 'storage_deposit' ],
   })
 }
 

@@ -90,8 +90,8 @@ function Header(): React.ReactElement {
     <Wrapper>
       <div className="container">
         <div className="left">
-          <Link to="/">
-            <a className="logo"><img src={logo} /></a>
+          <Link to="/" className="logo">
+            <img src={logo} />
           </Link>
         </div>
         <div className="right">

@@ -1,33 +1,119 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 
-import { Modal, Form, Input, Button } from 'antd';
+import { Modal, Form, Input, Button, Alert, message } from 'antd';
+import { LoadingOutlined } from '@ant-design/icons';
+
+import Big from 'big.js';
+
+const BOATLOAD_OF_GAS = Big(3).times(10 ** 14).toFixed();
 
 function SendModal({ visible, onCancel }) {
 
   const [isSubmiting, setIsSubmiting] = useState(false);
+  const [accountChecking, setAccountChecking] = useState(false);
+  const [accountChecked, setAccountChecked] = useState(false);
 
-  const onFinish = useCallback((values) => {
-    const { amount, to } = values;
-    if (!amount || isNaN(amount) || !to) return;
+  const [amount, setAmount] = useState(0);
+  const [sendTo, setSendTo] = useState('');
 
-    setIsSubmiting(true);
-    
+  const [accountErrorType, setAccountErrorType] = useState(0);
+  const [isRegistering, setIsRegistering] = useState(false);
 
-  }, []);
+  const [isTransfering, setIsTransfering] = useState(false);
+
+  const checkAccount = useCallback(() => {
+    setAccountChecking(true);
+    window.tokenContract?.storage_balance_of({
+      account_id: sendTo
+    }).then(data => {
+      setAccountErrorType(0);
+      setAccountChecking(false);
+      setAccountChecked(false);
+      if (data === null) {
+        return setAccountErrorType(1);
+      }
+      setAccountChecked(true);
+    }).catch(err => {
+      setAccountChecking(false);
+      message.error(err.toString());
+    })
+  }, [sendTo]);
+
+  useEffect(() => {
+    if (!visible) {
+      setAccountChecked(false);
+      setAccountChecking(false);
+      setAccountErrorType(0);
+      setIsTransfering(false);
+      setIsRegistering(false);
+    }
+  }, [visible]);
+
+  const onRegister = useCallback(() => {
+    setIsRegistering(true);
+    window.tokenContract?.storage_deposit(
+      {
+        account_id: sendTo
+      },
+      BOATLOAD_OF_GAS,
+      Big(1).times(10 ** 22).toFixed(),
+    ).then(() => {
+      window.location.reload();
+    }).catch((err) => {
+      setIsRegistering(false);
+      message.error(err.toString());
+    });
+  }, [sendTo, amount]);
+
+  const onTransfer = useCallback(() => {
+    setIsTransfering(true);
+    window.tokenContract?.ft_transfer(
+      {
+        receiver_id: sendTo,
+        amount: amount,
+        memo: ''
+      },
+      BOATLOAD_OF_GAS,
+      1,
+    ).then(() => {
+      window.location.reload();
+    }).catch((err) => {
+      setIsTransfering(false);
+      message.error(err.toString());
+    })
+  }, [sendTo]);
 
   return (
     <Modal visible={visible} destroyOnClose={true} onCancel={onCancel} 
       footer={null} title='Send' width={400}>
-      <Form layout='vertical' onFinish={onFinish}>
-        <Form.Item name='amount' label='Amount'>
-          <Input placeholder='0' size='large' type='number' />
+      <Form layout='vertical'>
+        <Form.Item label='Amount' rules={[
+          { required: true, message: 'Please input the amount' }
+        ]}>
+          <Input placeholder='0' size='large' type='number' onChange={e => setAmount(e.target.value as any)} />
         </Form.Item>
-        <Form.Item name='to' label='Send To'>
-          <Input placeholder='eg. oct.testnet' size='large' />
+        <Form.Item name='to' label='Send To' rules={[
+          { required: true, message: 'Please input the send to account' }
+        ]} extra={
+          accountErrorType > 0 &&
+          <div>
+            {
+              accountErrorType == 1 ?
+              <div style={{ marginTop: '10px' }}>
+                <span>This account haven't registered.</span>
+                <Button type='ghost' loading={isRegistering} onClick={onRegister} size='small'>Register for him</Button>
+              </div> :
+              <Alert message='Account invalid' type="warning" showIcon 
+                style={{ padding: '10px 0', border: 'none', background: '#fff' }} />
+            }
+          </div>
+        }>
+          <Input placeholder='eg. oct.testnet' size='large' onBlur={checkAccount} onChange={e => setSendTo(e.target.value as any)}
+            suffix={accountChecking ? <LoadingOutlined /> : null} />
         </Form.Item>
         <Form.Item>
-          <Button style={{ width: '100%' }} type='primary' htmlType='submit'
-            loading={isSubmiting} size='large'>Submit</Button>
+          <Button style={{ width: '100%' }} type='primary' onClick={onTransfer} loading={isTransfering}
+            size='large' disabled={!amount || !sendTo || !accountChecked}>Submit</Button>
         </Form.Item>
       </Form>
     </Modal>
