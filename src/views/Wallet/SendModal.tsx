@@ -92,7 +92,7 @@ function SendModal({ visible, onCancel }) {
       setIsTransfering(false);
       message.error(err.toString());
     })
-  }, [sendTo]);
+  }, [sendTo, amount]);
 
   return (
     <Modal visible={visible} destroyOnClose={true} onCancel={onCancel} 
