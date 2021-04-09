@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
 
-import { Button, Modal, Form, Input, Alert } from "antd";
+import { Button, Modal, Form, Input, Alert, message } from "antd";
 
 import TokenBadge from "../../components/TokenBadge";
 
@@ -21,10 +21,14 @@ function RegisterModal({ visible, onCancel, onOk }): React.ReactElement {
   }, [visible]);
 
   const onFinish = useCallback((values) => {
+    const { bondTokenAmount } = values;
+    if (bondTokenAmount < miniumBondTokenAmount) {
+      return message.error(`Bond token amount must gretter than ${miniumBondTokenAmount}`);
+    }
     setIsSubmiting(true);
     onOk(values);
   }, []);
-
+  
   return (
     <Modal visible={visible} title="Register Appchain" 
       onCancel={onCancel} destroyOnClose={true} footer={null}>
@@ -34,7 +38,7 @@ function RegisterModal({ visible, onCancel, onOk }): React.ReactElement {
           <Input placeholder="please input the appchain name." size="large" />
         </Form.Item>
         <Form.Item name="bondTokenAmount" label="Bond Token" extra={
-          accountBalance < bondTokenAmount &&
+          accountBalance*1 < bondTokenAmount*1 &&
           <Alert message="insufficient balance" type="warning" showIcon 
             style={{ padding: '10px 0', border: 'none', background: '#fff' }} />
         }>

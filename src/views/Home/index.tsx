@@ -44,6 +44,10 @@ function Home(): React.ReactElement {
 
   const columns = [
     {
+      title: "ID",
+      dataIndex: "id",
+    },
+    {
       title: "Name",
       dataIndex: "appchain_name",
     },

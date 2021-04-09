@@ -112,7 +112,7 @@ function StakingModal({ visible, appchainId, onCancel }): React.ReactElement {
         <div>
           <Form onFinish={onStakingMore} labelCol={{ span: 8 }} wrapperCol={{ span: 16 }} form={form}>
             <Form.Item name="stakingAmount" label="Staking Amount" extra={
-              accountBalance < stakingAmount &&
+              accountBalance*1 < stakingAmount*1 &&
               <Alert message="insufficient balance" type="warning" showIcon 
                 style={{ padding: '10px 0', border: 'none', background: '#fff' }} />
             }>
@@ -133,7 +133,7 @@ function StakingModal({ visible, appchainId, onCancel }): React.ReactElement {
             <Input placeholder="please input your validator id" size="large" />
           </Form.Item>
           <Form.Item name="stakingAmount" label="Staking Amount" extra={
-            accountBalance < stakingAmount &&
+            accountBalance*1 < stakingAmount*1 &&
             <Alert message="insufficient balance" type="warning" showIcon 
               style={{ padding: '10px 0', border: 'none', background: '#fff' }} />
           }>
