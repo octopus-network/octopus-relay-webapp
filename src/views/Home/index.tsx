@@ -64,12 +64,14 @@ function Home(): React.ReactElement {
       }
     },
     {
-      title: "Bonded",
-      dataIndex: "bond_tokens",
-      render: (value) => {
+      title: "Staked",
+      key: "Staked",
+      render: (_, fields) => {
+        const { validators } = fields;
         return (
           <span>
-            { value } <TokenBadge />
+            { validators.length ? validators.reduce((a, b) => a.staked_amount + b.staked_amount) : 0 }
+            <TokenBadge />
           </span>
         )
       }

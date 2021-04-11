@@ -148,14 +148,28 @@ function Appchain(): React.ReactElement {
             <Descriptions.Item label="Chain Spec">
               {
                 appchain.chain_spec_url ? 
-                <a href={appchain.chain_spec_url} target="_blank" >Download</a> :
+                <CopyToClipboard text={appchain.chain_spec_url} onCopy={() => message.info('Copied!')}>
+                  <div style={{ cursor: 'pointer', display: 'flex' }}>
+                    <span style={{ flex: '1', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', maxWidth: '240px' }}>
+                      { appchain.chain_spec_url }
+                    </span> 
+                    <span style={{ marginLeft: "5px", color: "#aaa" }}><CopyOutlined /></span>
+                  </div>
+                </CopyToClipboard> :
                 <span></span>
               }
             </Descriptions.Item>
             <Descriptions.Item label="Chain Spec Hash">
               {
                 appchain.chain_spec_hash ?
-                <span>{appchain.chain_spec_hash} (SHA256)</span> :
+                <CopyToClipboard text={appchain.chain_spec_hash} onCopy={() => message.info('Copied!')}>
+                  <div style={{ cursor: 'pointer', display: 'flex' }}>
+                    <span style={{ flex: '1', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', maxWidth: '240px' }}>
+                      { appchain.chain_spec_hash }
+                    </span> 
+                    <span style={{ marginLeft: "5px", color: "#aaa" }}><CopyOutlined /></span>
+                  </div>
+                </CopyToClipboard> :
                 <span></span>
               }
             </Descriptions.Item>
