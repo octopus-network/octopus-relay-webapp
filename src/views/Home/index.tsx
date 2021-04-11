@@ -68,10 +68,11 @@ function Home(): React.ReactElement {
       key: "Staked",
       render: (_, fields) => {
         const { validators } = fields;
+        let totalStaked = 0;
+        validators.map(v => totalStaked += v.staked_amount);
         return (
           <span>
-            { validators.length ? validators.reduce((a, b) => a.staked_amount + b.staked_amount) : 0 }
-            <TokenBadge />
+            { totalStaked } <TokenBadge />
           </span>
         )
       }
