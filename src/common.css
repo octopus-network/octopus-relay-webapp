@@ -22,6 +22,10 @@ body {
   padding: 0;
 }
 
+#root {
+  height: 100vh;
+}
+
 p {
   margin: 0!important;
 }

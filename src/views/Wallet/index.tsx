@@ -1,8 +1,11 @@
 import React, { useEffect, useState, useCallback } from "react";
 
 import { Card, Spin, Button, Result, message } from 'antd';
+import { HomeOutlined, DollarCircleFilled } from '@ant-design/icons';
+
 import Big from 'big.js';
 
+import { Link } from 'react-router-dom';
 import styles from './style.less';
 
 import SendModal from './SendModal';
@@ -65,6 +68,15 @@ function Wallet(): React.ReactElement {
 
   return (
     <div>
+      <div className={styles.title}>
+        <DollarCircleFilled />
+        <span>OCT Wallet</span>
+      </div>
+      <div className={styles.breadcrumb}>
+        <Link to='/'>
+          <HomeOutlined /> <span>Home</span>
+        </Link>
+      </div>
       <Card bordered={false} className={styles.wrapper}>
         {
           window.accountId ?

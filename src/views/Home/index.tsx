@@ -1,18 +1,20 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { Row, Col, Button, Table, Card, message, Statistic } from "antd";
 
-import { PlusOutlined, RightOutlined } from "@ant-design/icons";
+import { PlusOutlined, RightOutlined, HomeFilled } from "@ant-design/icons";
 
 import { utils } from 'near-api-js';
 import { Link, useNavigate } from "react-router-dom";
 
 import Big from 'big.js';
-import RegisterModal from "./RegisterModal";
-import StakingModal from "./StakingModal";
-import UpdateModal from "./UpdateModal";
+
+import StakingModal from './StakingModal';
+import ActiveModal from './ActiveModal';
 
 import TokenBadge from "../../components/TokenBadge";
 import Status from "../../components/Status";
+
+import styles from './styles.less';
 
 const BOATLOAD_OF_GAS = Big(3).times(10 ** 14).toFixed();
 
@@ -23,18 +25,15 @@ function Home(): React.ReactElement {
   let isSignedIn = window.walletConnection?.isSignedIn();
 
   const [isLoadingList, setIsLoadingList] = useState<boolean>(false);
-  const [isLoadingOverview, setIsLoadingOverview] = useState<boolean>(false);
 
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
 
-  const [registerModalVisible, setRegisterModalVisible] = useState<boolean>(false);
+  const [activeModalVisible, setActiveModalVisible] = useState<boolean>(false);
   const [stakingModalVisible, setStakingModalVisible] = useState<boolean>(false);
-  const [updateModalVisible, setUpdateModalVisible] = useState<boolean>(false);
 
   const [numberAppchains, setNumberAppchains] = useState<number>(0);
-  const [miniumStakingAmount, setMiniumStakingAmount] = useState<number>(0);
+
   const [stakedBalance, setStakedBalance] = useState<number>(0);
-  const [totalBalance, setTotalBalance] = useState<number>(0);
 
   const [appchains, setAppchains] = useState<any[]>();
 
@@ -87,7 +86,7 @@ function Home(): React.ReactElement {
       }
     },
     {
-      title: "Action",
+      title: "",
       key: "action",
       render: (text, fields) => {
         const { id, validators, founder_id, status } = fields;
@@ -110,15 +109,9 @@ function Home(): React.ReactElement {
                   </Button> : null
                 ) :
           
-                window.accountId == founder_id ?
-                (
-                  status == 'InProgress' ?
-                  <Button type='primary' onClick={() => updateAppchain(fields.id)}>
-                    Update
-                  </Button> : null
-                ) :
+                window.accountId != founder_id ?
 
-                <Button onClick={() => { setAppchainId(fields.id); toggleStakingModalVisible(); }} type="ghost">Staking</Button>
+                <Button onClick={() => { setAppchainId(fields.id); toggleStakingModalVisible(); }} type="ghost">Staking</Button> : null
              
               )
             }
@@ -129,33 +122,23 @@ function Home(): React.ReactElement {
     }
   ];
 
-  const toggleRegisterModalVisible = useCallback(() => {
-    setRegisterModalVisible(!registerModalVisible);
-  }, [registerModalVisible]);
-
   const toggleStakingModalVisible = useCallback(() => {
     setStakingModalVisible(!stakingModalVisible);
   }, [stakingModalVisible]);
 
-  const toggleUpdateModalVisible = useCallback(() => {
-    setUpdateModalVisible(!updateModalVisible);
-  }, [updateModalVisible]);
-
   const getAppchains = useCallback(() => {
     setIsLoadingList(true);
-    setIsLoadingOverview(true);
+   
     Promise.all([
         window.contract.get_num_appchains(),
         window.contract.get_total_staked_balance(),
-        window.contract.get_minium_staking_amount(),
-        window.tokenContract.ft_balance_of({ account_id: window.contractName })
       ])
-      .then(([num_appchains, stakedBlance, amount, balance]) => {
-        setIsLoadingOverview(false);
+      .then(([num_appchains, stakedBlance]) => {
+
         setNumberAppchains(num_appchains);
-        setMiniumStakingAmount(amount);
+
         setStakedBalance(stakedBlance);
-        setTotalBalance(balance);
+
         return window.contract.get_appchains({from_index: 0, limit: num_appchains});
       })
       .then(list => {
@@ -215,57 +198,9 @@ function Home(): React.ReactElement {
 
   }, []);
 
-  const onRegister = function(values) {
-    const { appchainName, bondTokenAmount } = values;
-    window.tokenContract.ft_transfer_call(
-      {
-        receiver_id: window.contractName,
-        amount: bondTokenAmount + '',
-        msg: `register_appchain,${appchainName}`
-      },
-      BOATLOAD_OF_GAS,
-      1,
-    ).then(() => {
-      window.location.reload();
-    }).catch((err) => {
-      message.error(err.toString());
-    });
-
-  }
-
-  const onUpdate = function(values) {
-    const { chainSpec, chainSpecHash, id } = values;
- 
-    window.contract.update_appchain(
-      {
-        appchain_id: id,
-        chain_spec_url: chainSpec,
-        chain_spec_hash: chainSpecHash
-      },
-      BOATLOAD_OF_GAS,
-      0
-    ).then(() => {
-      window.location.reload();
-    }).catch(err => {
-      setUpdateModalVisible(false);
-      message.error(err.toString());
-    })
-  }
-
   const activeAppchain = function(appchainId) {
-    setIsLoading(true);
-    window.contract.active_appchain(
-      {
-        appchain_id: appchainId,
-      },
-      BOATLOAD_OF_GAS,
-      0
-    ).then(() => {
-      window.location.reload();
-    }).catch((err) => {
-      setIsLoading(false);
-      message.error(err.toString());
-    });
+    setAppchainId(appchainId);
+    setActiveModalVisible(true);
   }
 
   const freezeAppchain = function(appchainId) {
@@ -284,30 +219,30 @@ function Home(): React.ReactElement {
     });
   }
 
-  const updateAppchain = function(appchainId) {
-    setAppchainId(appchainId);
-    setUpdateModalVisible(true);
-  }
-
   return (
-    <>
-     <Card title="Overview" bordered={false}>
-        <Row gutter={16}>
-          <Col span={8}>
-            <Statistic title="Total Appchains" value={numberAppchains} />
-          </Col>
-          <Col span={8}>
-            <Statistic title="Staked"  value={stakedBalance} suffix={<TokenBadge />} />
-          </Col>
-          <Col span={8}>
-            <Statistic title="Block Height" value={currBlock} />
-          </Col>
-        </Row>
-      </Card>
+    <> 
+    
+      <div className={styles.overview}>
+        <Card title="Overview" bordered={false}>
+          <Row gutter={16}>
+            <Col span={8}>
+              <Statistic title="Total Appchains" value={numberAppchains} />
+            </Col>
+            <Col span={8}>
+              <Statistic title="Staked"  value={stakedBalance} suffix={<TokenBadge />} />
+            </Col>
+            <Col span={8}>
+              <Statistic title="Block Height" value={currBlock} />
+            </Col>
+          </Row>
+        </Card>
+      </div>
       <div style={{ marginTop: "15px" }}>
         <Card title="Appchains" extra={
           isSignedIn &&
-          <Button type="primary" onClick={toggleRegisterModalVisible} icon={<PlusOutlined />}>Register</Button>
+          <Link to="/register">
+            <Button type="primary" icon={<PlusOutlined />}>Register</Button>
+          </Link>
         } bordered={false}>
           <Table rowKey={(record) => record.id} columns={columns} loading={isLoadingList || isLoading} 
             dataSource={appchains} onRow={record => {
@@ -317,8 +252,7 @@ function Home(): React.ReactElement {
             }} />
         </Card>
       </div>
-      <RegisterModal visible={registerModalVisible} onCancel={toggleRegisterModalVisible} onOk={onRegister} />
-      <UpdateModal appchainId={appchainId} visible={updateModalVisible} onCancel={toggleUpdateModalVisible} onOk={onUpdate} />
+      <ActiveModal appchainId={appchainId} visible={activeModalVisible} onCancel={() => setActiveModalVisible(false)} />
       <StakingModal appchainId={appchainId} visible={stakingModalVisible} onCancel={toggleStakingModalVisible} />
     </>
   );

@@ -1,11 +1,14 @@
 import React from "react";
 
+import { DownloadOutlined, SelectOutlined } from '@ant-design/icons';
+
 import { Outlet } from 'react-router-dom';
 import Header from "../components/Header";
 
 import styled from "styled-components";
 
 const Content = styled.div`
+  min-height: calc(100% - 155px);
   .container {
     padding: 15px;
   }
@@ -14,6 +17,7 @@ const Content = styled.div`
 const Footer = styled.div`
   .container {
     line-height: 20px;
+    border-top: 1px solid #eee;
     padding: 15px;
     display: flex;
     font-size: 12px;
@@ -23,6 +27,7 @@ const Footer = styled.div`
       text-decoration: underline;
     }
   }
+  
 `;
 
 function Main(): React.ReactElement {
@@ -37,15 +42,30 @@ function Main(): React.ReactElement {
       <Footer>
         <div className="container">
           <div style={{ display: 'flex' }}>
-           
             <div>
               <p>Copyright &copy; 2021 <a href="https://www.oct.network">Octopus Network</a></p>
-              <p><a>Term of service</a> | <a>Privacy Policy</a></p>
+              <p><a>Term of service</a> | <a>Privacy policy</a></p>
             </div>
           </div>
           <div style={{ display: 'flex', alignItems: 'flex-end', flexDirection: 'column' }}>
-            <p>Contract: <a>{ window.contractName }</a></p>
-            <p>Token Contract: <a>{ window.tokenContractName }</a></p>
+            <p>
+              <span>Relay contract: </span>
+              <a target="_blank" href={`${window.nearConfig.explorerUrl}/accounts/${window.contractName}`}>
+                {window.contractName}
+              </a>
+            </p>
+            <p>
+              <span>Token contract: </span>
+              <a target="_blank" href={`${window.nearConfig.explorerUrl}/accounts/${window.tokenContractName}`}>
+                {window.tokenContractName}
+              </a>
+            </p>
+            <p>
+              <span>Chainspec snippet: </span>
+              <a target="_blank" href="https://storage.googleapis.com/dl-testnet/chainspec-snippet.json">
+                Download <DownloadOutlined />
+              </a>
+            </p>
           </div>
         </div>
       </Footer>

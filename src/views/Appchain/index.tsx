@@ -3,11 +3,15 @@ import React, { useState, useEffect, useCallback } from "react";
 import { utils } from 'near-api-js';
 import { useParams } from 'react-router-dom';
 import { Card, Descriptions, message, Table, Button } from "antd";
-import { LeftOutlined, RightOutlined, SelectOutlined, CopyOutlined } from "@ant-design/icons";
+import { LeftOutlined, PlusCircleFilled, RightOutlined, SelectOutlined, CopyOutlined } from "@ant-design/icons";
+
+import { Link } from 'react-router-dom';
 
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import TokenBadge from "../../components/TokenBadge";
 import Status from "../../components/Status";
+
+import styles from './styles.less';
 
 function Appchain(): React.ReactElement {
   const { id } = useParams();
@@ -132,10 +136,24 @@ function Appchain(): React.ReactElement {
       window.location.href = `https://explorer.testnet.near.org/blocks/${result.header.hash}`;
     });
   }
-
+  
   return (
     <div>
-      <Card loading={isLoading} title="Detail" bordered={false}>
+      
+      <div className={styles.breadcrumb}>
+        <Link to='/'>
+          <div>
+            <LeftOutlined /> <span>Back to home</span>
+          </div>
+        </Link>
+      </div>
+    
+      <Card loading={isLoading} bordered={false} title='Detail' extra={
+        window.accountId == appchain?.founder_id &&
+        <Link to={`/update/${id}`}>
+          <Button type='primary'>Update</Button>
+        </Link>
+      }>
         {
           appchain !== undefined &&
           <Descriptions column={2}>
@@ -145,9 +163,21 @@ function Appchain(): React.ReactElement {
             </Descriptions.Item>
             <Descriptions.Item label="Appchain Name">{appchain.appchain_name}</Descriptions.Item>
             <Descriptions.Item label="Founder">{appchain.founder_id}</Descriptions.Item>
-            <Descriptions.Item label="Chain Spec">
-              {
-                appchain.chain_spec_url ? 
+            {
+              appchain.website_url &&
+              <Descriptions.Item label="Website">
+                <a target='_blank' href={appchain.website_url}>{appchain.website_url}</a>
+              </Descriptions.Item>
+            }
+            {
+              appchain.github_address && 
+              <Descriptions.Item label="Github">
+                <a target='_blank' href={appchain.github_address}>{appchain.github_address}</a>
+              </Descriptions.Item>
+            }
+            {
+              appchain.chain_spec_url &&
+              <Descriptions.Item label="Chain Spec">
                 <CopyToClipboard text={appchain.chain_spec_url} onCopy={() => message.info('Copied!')}>
                   <div style={{ cursor: 'pointer', display: 'flex' }}>
                     <span style={{ flex: '1', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', maxWidth: '240px' }}>
@@ -155,13 +185,12 @@ function Appchain(): React.ReactElement {
                     </span> 
                     <span style={{ marginLeft: "5px", color: "#aaa" }}><CopyOutlined /></span>
                   </div>
-                </CopyToClipboard> :
-                <span></span>
-              }
-            </Descriptions.Item>
-            <Descriptions.Item label="Chain Spec Hash">
-              {
-                appchain.chain_spec_hash ?
+                </CopyToClipboard>
+              </Descriptions.Item>
+            }
+            {
+              appchain.chain_spec_hash &&
+              <Descriptions.Item label="Chain Spec Hash">
                 <CopyToClipboard text={appchain.chain_spec_hash} onCopy={() => message.info('Copied!')}>
                   <div style={{ cursor: 'pointer', display: 'flex' }}>
                     <span style={{ flex: '1', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', maxWidth: '240px' }}>
@@ -169,10 +198,10 @@ function Appchain(): React.ReactElement {
                     </span> 
                     <span style={{ marginLeft: "5px", color: "#aaa" }}><CopyOutlined /></span>
                   </div>
-                </CopyToClipboard> :
-                <span></span>
-              }
-            </Descriptions.Item>
+                </CopyToClipboard>
+              </Descriptions.Item>
+            }
+           
             <Descriptions.Item label="Bond Tokens">{appchain.bond_tokens} <TokenBadge /></Descriptions.Item>
             <Descriptions.Item label="Status"><Status type={appchain.status} /></Descriptions.Item>
           </Descriptions>
