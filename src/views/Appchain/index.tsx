@@ -201,6 +201,34 @@ function Appchain(): React.ReactElement {
                 </CopyToClipboard>
               </Descriptions.Item>
             }
+
+            {
+              appchain.boot_nodes &&
+              <Descriptions.Item label="Boot Nodes">
+                <CopyToClipboard text={appchain.boot_nodes} onCopy={() => message.info('Copied!')}>
+                  <div style={{ cursor: 'pointer', display: 'flex' }}>
+                    <span style={{ flex: '1', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', maxWidth: '240px' }}>
+                      { appchain.boot_nodes }
+                    </span> 
+                    <span style={{ marginLeft: "5px", color: "#aaa" }}><CopyOutlined /></span>
+                  </div>
+                </CopyToClipboard>
+              </Descriptions.Item>
+            }
+
+            {
+              appchain.rpc_endpoint &&
+              <Descriptions.Item label="RPC Endpoint">
+                <CopyToClipboard text={appchain.rpc_endpoint} onCopy={() => message.info('Copied!')}>
+                  <div style={{ cursor: 'pointer', display: 'flex' }}>
+                    <span style={{ flex: '1', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', maxWidth: '240px' }}>
+                      { appchain.rpc_endpoint }
+                    </span> 
+                    <span style={{ marginLeft: "5px", color: "#aaa" }}><CopyOutlined /></span>
+                  </div>
+                </CopyToClipboard>
+              </Descriptions.Item>
+            }
            
             <Descriptions.Item label="Bond Tokens">{appchain.bond_tokens} <TokenBadge /></Descriptions.Item>
             <Descriptions.Item label="Status"><Status type={appchain.status} /></Descriptions.Item>
