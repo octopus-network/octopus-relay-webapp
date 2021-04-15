@@ -12,6 +12,11 @@ const BOATLOAD_OF_GAS = Big(3).times(10 ** 14).toFixed();
 import styles from './styles.less';
 
 function Register(): React.ReactElement {
+  const urlParams = new URLSearchParams(window.location.search);
+  const transactionHashes = urlParams.get('transactionHashes');
+  if (transactionHashes) {
+    window.location.replace('/');
+  }
 
   const miniumBondTokenAmount = 100;
   const [accountBalance, setAccountBalance] = useState(0);
