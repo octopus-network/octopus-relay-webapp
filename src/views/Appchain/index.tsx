@@ -178,7 +178,7 @@ function Appchain(): React.ReactElement {
             {
               appchain.chain_spec_url &&
               <Descriptions.Item label="Chain Spec">
-                <CopyToClipboard text={appchain.chain_spec_url} onCopy={() => message.info('Copied!')}>
+                <CopyToClipboard text={`${appchain.chain_spec_url}`} onCopy={() => message.info('Copied!')}>
                   <div style={{ cursor: 'pointer', display: 'flex' }}>
                     <span style={{ flex: '1', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', maxWidth: '240px' }}>
                       { appchain.chain_spec_url }
@@ -191,10 +191,10 @@ function Appchain(): React.ReactElement {
             {
               appchain.chain_spec_hash &&
               <Descriptions.Item label="Chain Spec Hash">
-                <CopyToClipboard text={appchain.chain_spec_hash} onCopy={() => message.info('Copied!')}>
+                <CopyToClipboard text={`sha256:${appchain.chain_spec_hash}`} onCopy={() => message.info('Copied!')}>
                   <div style={{ cursor: 'pointer', display: 'flex' }}>
                     <span style={{ flex: '1', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', maxWidth: '240px' }}>
-                      { appchain.chain_spec_hash }
+                      sha256:{ appchain.chain_spec_hash }
                     </span> 
                     <span style={{ marginLeft: "5px", color: "#aaa" }}><CopyOutlined /></span>
                   </div>
@@ -203,7 +203,7 @@ function Appchain(): React.ReactElement {
             }
 
             {
-              appchain.boot_nodes &&
+              appchain.status == 'Active' && appchain.boot_nodes &&
               <Descriptions.Item label="Boot Nodes">
                 <CopyToClipboard text={appchain.boot_nodes} onCopy={() => message.info('Copied!')}>
                   <div style={{ cursor: 'pointer', display: 'flex' }}>
@@ -217,7 +217,7 @@ function Appchain(): React.ReactElement {
             }
 
             {
-              appchain.rpc_endpoint &&
+              appchain.status == 'Active' && appchain.rpc_endpoint &&
               <Descriptions.Item label="RPC Endpoint">
                 <CopyToClipboard text={appchain.rpc_endpoint} onCopy={() => message.info('Copied!')}>
                   <div style={{ cursor: 'pointer', display: 'flex' }}>

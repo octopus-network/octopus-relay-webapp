@@ -1,7 +1,9 @@
 import React, { useCallback, useState, useEffect } from "react";
 
-import { Button, Modal, Form, Input, message, Popconfirm, Spin, Alert } from "antd";
+import { Button, Modal, Form, Input, message, Popconfirm, Spin, Alert, Tooltip } from "antd";
 import Big from 'big.js';
+
+import { QuestionCircleOutlined } from '@ant-design/icons';
 
 const BOATLOAD_OF_GAS = Big(3).times(10 ** 14).toFixed();
 
@@ -111,7 +113,9 @@ function StakingModal({ visible, appchainId, onCancel }): React.ReactElement {
         appchain?.validators.some(v => v.account_id == window.accountId) ?
         <div>
           <Form onFinish={onStakingMore} labelCol={{ span: 8 }} wrapperCol={{ span: 16 }} form={form}>
-            <Form.Item name="stakingAmount" label="Staking Amount" extra={
+            <Form.Item name="stakingAmount" label="Staking Amount" rules={[
+              { required: true, message: 'Please input the staking amount' }
+            ]} extra={
               accountBalance*1 < stakingAmount*1 &&
               <Alert message="insufficient balance" type="warning" showIcon 
                 style={{ padding: '10px 0', border: 'none', background: '#fff' }} />
@@ -129,14 +133,21 @@ function StakingModal({ visible, appchainId, onCancel }): React.ReactElement {
           </Form>
         </div> :
         <Form onFinish={onStaking} labelCol={{ span: 8 }} wrapperCol={{ span: 16 }} form={form}>
-          <Form.Item name="validatorId" label="Validator Id">
+          <Form.Item name="validatorId" label={<>
+              <span style={{ marginRight: '5px' }}>Validator ID</span>
+              <Tooltip title="Your validator id on the appchain" ><QuestionCircleOutlined /></Tooltip>
+            </>} rules={[
+              { required: true, message: 'Please input your validator id' }
+            ]}>
             <Input placeholder="please input your validator id" size="large" />
           </Form.Item>
           <Form.Item name="stakingAmount" label="Staking Amount" extra={
             accountBalance*1 < stakingAmount*1 &&
             <Alert message="insufficient balance" type="warning" showIcon 
               style={{ padding: '10px 0', border: 'none', background: '#fff' }} />
-          }>
+          }  rules={[
+            { required: true, message: 'Please input the staking amount' }
+          ]}>
             <Input placeholder="The amount you want to staking for" type="number" addonAfter={<TokenBadge />} 
               onChange={e => setStakingAmount(e.target.value as any)} size="large" />
           </Form.Item>
