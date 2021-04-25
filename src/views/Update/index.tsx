@@ -62,7 +62,7 @@ function Update(): React.ReactElement {
   const [form] = Form.useForm();
 
   return (
-    <div>
+    <div className="container" style={{ padding: '20px 0' }}>
     
       <div className={styles.breadcrumb} onClick={() => navigate(-1) }>
         <LeftOutlined /> <span>Back</span>

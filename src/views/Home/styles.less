@@ -11,5 +11,127 @@
 }
 
 .overview {
-  margin-top: 30px;
+  padding: 60px 0px;
+  background: #030e21;
+  :global {
+    .container {
+      display: flex;
+    }
+  }
+  .statistic {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    .number {
+      font-size: 28px;
+      color: rgba(255, 255, 255, 1);
+      font-weight: 500;
+    }
+    .desc {
+      color: rgba(255, 255, 255, .5);
+      font-style: normal;
+      font-size: 13px;
+    }
+  }
+}
+
+.sectionTitle {
+  font-size: 24px;
+  font-weight: 500;
+}
+
+.appchainList {
+  margin-top: 10px;
+  .header {
+    padding: 20px 30px;
+    padding-bottom: 10px;
+    color: #9c9c9c;
+  }
+  .content {
+    background: #fff;
+    border-radius: 5px;
+    padding: 20px 15px;
+   
+  }
+  .appchain {
+    padding: 20px 15px;
+    font-size: 16px;
+    position: relative;
+    &:first-child .id {
+      background: #f4d872;
+    }
+    &:nth-child(2) .id {
+      background: #989ef5;
+    }
+    &:not(:last-child):after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      width: auto;
+      height: 1px;
+      background: #f5f5f5;
+    }
+    &:hover {
+      background: #f5f5f5;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+    .id {
+      display: inline-block;
+      width: 24px;
+      height: 24px;
+      line-height: 24px;
+      border-radius: 50%;
+      background: #ddd;
+      color: #fff;
+      text-align: center;
+      font-weight: 500;
+      font-style: normal;
+      font-size: 16px;
+    }
+    .name {
+      font-size: 16px;
+      font-weight: 500;
+      margin-left: 15px;
+    }
+    .status {
+      display: inline-block;
+      background: rgba(6,189,188,.1);
+      color: #06bdbc;
+      padding: 3px 10px;
+      border-radius: 5px;
+      font-size: 13px;
+      &.Active {
+        background: #FCD535;
+        color: #1c1c1c;
+      }
+      &.InProgress {
+        color: #1c1c1c;
+        background: #b7f3af;
+      }
+    }
+  }
+  .skeleton {
+    padding: 20px 15px;
+    height: 66px;
+    .circle, .name, .rest {
+      display: inline-block;
+      height: 24px;
+      background: #eee;
+    }
+    .circle {
+      width: 24px;
+      border-radius: 50%;
+    }
+    .name {
+      width: 160px;
+      margin-left: 15px;
+    }
+    .name, .rest {
+      border-radius: 5px;
+    }
+  }
 }

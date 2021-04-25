@@ -1,29 +1,18 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { Row, Col, Button, Table, Card, message, Statistic } from "antd";
 
-import { PlusOutlined, RightOutlined, HomeFilled } from "@ant-design/icons";
-
 import { utils } from 'near-api-js';
-import { Link, useNavigate } from "react-router-dom";
 
-import Big from 'big.js';
+import { useNavigate } from "react-router-dom";
 
-import StakingModal from './StakingModal';
-import ActiveModal from './ActiveModal';
-
-import TokenBadge from "../../components/TokenBadge";
-import Status from "../../components/Status";
+import Overview from './Overview';
 
 import styles from './styles.less';
-
-const BOATLOAD_OF_GAS = Big(3).times(10 ** 14).toFixed();
 
 function Home(): React.ReactElement {
 
   const navigate = useNavigate();
-
-  let isSignedIn = window.walletConnection?.isSignedIn();
-
+  
   const [isLoadingList, setIsLoadingList] = useState<boolean>(false);
 
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
@@ -37,126 +26,60 @@ function Home(): React.ReactElement {
 
   const [appchains, setAppchains] = useState<any[]>();
 
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-
-  const [appchainId, setAppchainId] = useState<number>(0);
-
-  const columns = [
-    {
-      title: "ID",
-      dataIndex: "id",
-    },
-    {
-      title: "Name",
-      dataIndex: "appchain_name",
-    },
-    {
-      title: "Founder",
-      dataIndex: "founder_id",
-    },
-    {
-      title: "Validators",
-      key: "validators",
-      render: (_, fields) => {
-        const { validators } = fields;
-        return <span>{validators.length}</span>
-      }
-    },
-    {
-      title: "Staked",
-      key: "Staked",
-      render: (_, fields) => {
-        const { validators } = fields;
-        let totalStaked = 0;
-        validators.map(v => totalStaked += v.staked_amount);
-        return (
-          <span>
-            { totalStaked } <TokenBadge />
-          </span>
-        )
-      }
-    },
-    {
-      title: "Status",
-      dataIndex: "status",
-      render: (text) => {
-        return (
-          <Status type={text} />
-        );
-      }
-    },
-    {
-      title: "",
-      key: "action",
-      render: (text, fields) => {
-        const { id, validators, founder_id, status } = fields;
-
-        return (
-          <Row justify="end" align="middle" onClick={e => e.stopPropagation()}>
-            {
-              window.accountId &&
-              (
-
-                isAdmin ?
-               
-                status == 'Frozen' ?
-                <Button type='primary' onClick={() => activeAppchain(fields.id)}>
-                  Active
-                </Button> : (
-                  status == 'Active' ?
-                  <Button type='ghost' onClick={() => freezeAppchain(fields.id)}>
-                    Freeze
-                  </Button> : null
-                ) :
-          
-                window.accountId != founder_id ?
-
-                <Button onClick={() => { setAppchainId(fields.id); toggleStakingModalVisible(); }} type="ghost">Staking</Button> : null
-             
-              )
-            }
-            <RightOutlined style={{ marginLeft: '10px', fontSize: '14px', color: '#ccc' }} />
-          </Row>
-        );
-      }
-    }
-  ];
-
   const toggleStakingModalVisible = useCallback(() => {
     setStakingModalVisible(!stakingModalVisible);
   }, [stakingModalVisible]);
 
-  const getAppchains = useCallback(() => {
+  const getSortedAppchains = useCallback(() => {
     setIsLoadingList(true);
+
+    window.contract.get_num_appchains().then(num => {
+      setNumberAppchains(num);
+      let promises = [];
+      for (let i = 0; i < num; i++) {
+        promises.push(window.contract.get_appchain({
+          appchain_id: i
+        }))
+      }
+      return Promise.all(promises);
+    }).then(appchains => {
+      setIsLoadingList(false);
+      if (appchains.length <= 0) return;
+
+      appchains.sort((a, b) => {
+        const statusRank = {
+          'Active': 99,
+          'InProgress': 98,
+          'Frozen': 97,
+          'Broken': 0
+        }
+        const validators0 = a.validators, validators1 = b.validators;
+        const totalStaked0 = validators0.reduce((total, b) => total + b.staked_amount, 0),
+          totalStaked1 = validators1.reduce((total, b) => total + b.staked_amount, 0);
+
+        // sort
+        if (a.status == b.status) {
+          if (validators0.length == validators1.length) {
+            if (totalStaked0 == totalStaked1) {
+              return b.id - a.id;
+            } else {
+              return totalStaked1 - totalStaked0;
+            }
+          } else {
+            return validators1.length - validators0.length;
+          }
+        } else {
+          return statusRank[b.status] - statusRank[a.status];
+        }
+      });
+
+      setAppchains(appchains);
+    }).catch(err => {
+      console.log(err);
+      message.error(err.toString());
+      setIsLoadingList(false);
+    });
    
-    Promise.all([
-        window.contract.get_num_appchains(),
-        window.contract.get_total_staked_balance(),
-      ])
-      .then(([num_appchains, stakedBlance]) => {
-
-        setNumberAppchains(num_appchains);
-
-        setStakedBalance(stakedBlance);
-
-        return window.contract.get_appchains({from_index: 0, limit: num_appchains});
-      })
-      .then(list => {
-        const t = []
-        list.map((item, id) => {
-          const t2 = {}
-          Object.assign(t2, { id }, item);
-          t.push(t2);
-        });
-     
-        setAppchains(t);
-        setIsLoadingList(false);
-      })
-      .catch(err => {
-        console.log(err);
-        message.error(err.toString());
-        setIsLoadingList(false);
-      })
   }, []);
 
   const [isFetching, setIsFetching] = useState<boolean>(false);
@@ -164,7 +87,7 @@ function Home(): React.ReactElement {
 
   // initialize
   useEffect(() => {
-    getAppchains();
+    getSortedAppchains();
 
     // check current account is admin or not
     if (window.accountId) {
@@ -198,47 +121,65 @@ function Home(): React.ReactElement {
 
   }, []);
 
-  const activeAppchain = function(appchainId) {
-    setAppchainId(appchainId);
-    setActiveModalVisible(true);
-  }
-
-  const freezeAppchain = function(appchainId) {
-    setIsLoading(true);
-    window.contract.freeze_appchain(
-      {
-        appchain_id: appchainId,
-      },
-      BOATLOAD_OF_GAS,
-      0
-    ).then(() => {
-      window.location.reload();
-    }).catch((err) => {
-      setIsLoading(false);
-      message.error(err.toString());
-    });
-  }
-
   return (
     <> 
-    
-      <div className={styles.overview}>
-        <Card title="Overview" bordered={false}>
-          <Row gutter={16}>
-            <Col span={8}>
-              <Statistic title="Total Appchains" value={numberAppchains} />
-            </Col>
-            <Col span={8}>
-              <Statistic title="Staked"  value={stakedBalance} suffix={<TokenBadge />} />
-            </Col>
-            <Col span={8}>
-              <Statistic title="Block Height" value={currBlock} />
-            </Col>
-          </Row>
-        </Card>
+      <div style={{ marginTop: '-75px', zIndex: -1 }}>
+        <Overview height={235} paddingTop={75} numberAppchains={numberAppchains} 
+          stakedBalance={stakedBalance} blockHeight={currBlock} />
       </div>
-      <div style={{ marginTop: "15px" }}>
-        <Card title="Appchains" extra={
+      <div style={{ marginTop: '50px' }} className="container">
+        <div className={styles.sectionTitle}>
+          <span>Hot Appchains</span>
+        </div>
+        <div className={styles.appchainList}>
+          <Row className={styles.header}>
+            <Col span={11}>Name</Col>
+            <Col span={5}>Validators</Col>
+            <Col span={4}>Staked</Col>
+            <Col span={4}><Row justify='end'>Status</Row></Col>
+          </Row>
+          <div className={styles.content}>
+          {
+            isLoadingList ?
+            <>
+            {
+              [0,1,2,3,4].map((_, idx) => {
+                return (
+                  <Row className={styles.skeleton} key={idx}>
+                    <Col span={11}>
+                      <i className={styles.circle} />
+                      <span className={styles.name} />
+                    </Col>
+                    <Col span={13} className={styles.rest} />
+                  </Row>
+                );
+              })
+            }
+            </> : 
+            appchains && appchains.length ? appchains.map((item, idx) => {
+              const { id, appchain_name, validators, status } = item;
+              const totalStaked = validators.reduce((total, b) => total + b.staked_amount, 0);
+              return (
+                <Row className={styles.appchain} key={idx} onClick={e => navigate(`/appchain/${id}`)}>
+                  <Col span={11}>
+                    <i className={styles.id}>{idx+1}</i>
+                    <span className={styles.name}>{appchain_name}</span>
+                  </Col>
+                  <Col span={5}>{validators.length}</Col>
+                  <Col span={4}>{totalStaked} OCT</Col>
+                  <Col span={4}>
+                    <Row justify='end'>
+                      <span className={`${styles.status} ${styles[status]}`}>{status}</span>
+                    </Row>
+                  </Col>
+                </Row>
+              )
+            }) :
+            <div>No data</div>
+          }
+          </div>
+        </div>
+        {/* <Card title="Appchains" extra={
           isSignedIn &&
           <Link to="/register">
             <Button type="primary" icon={<PlusOutlined />}>Register</Button>
@@ -250,10 +191,9 @@ function Home(): React.ReactElement {
                 onClick: event => navigate(`/appchain/${record.id}`)
               }
             }} />
-        </Card>
+        </Card> */}
       </div>
-      <ActiveModal appchainId={appchainId} visible={activeModalVisible} onCancel={() => setActiveModalVisible(false)} />
-      <StakingModal appchainId={appchainId} visible={stakingModalVisible} onCancel={toggleStakingModalVisible} />
+      
     </>
   );
 }

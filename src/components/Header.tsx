@@ -8,32 +8,53 @@ import styled from "styled-components";
 import TokenBadge from "../components/TokenBadge";
 import logo from "../assets/logo.png";
 
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 const Wrapper = styled.div`
-  background: #fff;
-  box-shadow: 0 2px 5px #f0f1f2;
+  position: relative;
+  z-index: 1;
   .container {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    padding: 15px;
     align-items: center;
   }
-  .logo {
-    display: inline-block;
-    width: 120px;
-    img {
-      display: block;
-      width: 100%;
-      height: auto;
+  .left {
+    display: flex;
+    align-items: center;
+    .logo {
+      display: inline-block;
+      width: 130px;
+      img {
+        display: block;
+        width: 100%;
+        height: auto;
+      }
+    }
+    .menu {
+      margin-left: 50px;
+      .ant-menu-item {
+        border-bottom: none;
+        a {
+          display: inline-block;
+          padding: 15px 0;
+          color: rgba(255, 255, 255, .5);
+        }
+      }
+     
+      .ant-menu-item-selected {
+        a {
+          color: rgba(255, 255, 255, 1);
+        }
+      }
+      
     }
   }
+  
   .avatar {
     cursor: pointer;
-    background: rgba(83,171,144,.2);
-   
-    color: #53ab90;
+    background: rgba(255,255,255,.2);
+    color: rgba(255,255,255,.8);
     border-radius: 50%;
     border-width: 2px;
     border-style: solid;
@@ -46,18 +67,20 @@ const Wrapper = styled.div`
     outline: none;
     transition: background .5s ease;
     &:focus {
-      background: #fff;
-      border-color: #53ab90;
+      background: rgba(255,255,255,.4);
+      color: rgba(255,255,255,1)
     }
   }
 `;
 
 import { login, logout } from "../utils";
 
-
 function Header(): React.ReactElement {
 
   const [accountBalance, setAccountBalance] = useState<String>('0');
+  const location = useLocation();
+
+  let pathname = location.pathname.split('/')[1];
 
   const menu = (
     <Menu>
@@ -87,12 +110,24 @@ function Header(): React.ReactElement {
   }, [window.accountId]);
 
   return (
-    <Wrapper>
+    <Wrapper style={{
+      background: pathname == 'home' ? 'transparent' : '#030e21'
+    }}>
       <div className="container">
         <div className="left">
           <Link to="/" className="logo">
             <img src={logo} />
           </Link>
+          <div className="menu">
+            <Menu mode="horizontal" style={{ borderBottom: 'none', background: 'transparent' }} selectedKeys={[pathname]}>
+              <Menu.Item key="home">
+                <Link to="/home">Home</Link>
+              </Menu.Item>
+              <Menu.Item key="appchain">
+                <Link to="/appchain">Appchain</Link>
+              </Menu.Item>
+            </Menu>
+          </div>
         </div>
         <div className="right">
           {

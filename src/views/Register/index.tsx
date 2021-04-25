@@ -60,17 +60,17 @@ function Register(): React.ReactElement {
   }, []);
 
   return (
-    <div>
+    <div className="container" style={{ padding: '20px 0' }}>
       <div className={styles.title}>
-        <PlusCircleFilled />
+      
         <span>Register Appchain</span>
       </div>
-      <Link to='/'>
+      {/* <Link to='/'>
         <div className={styles.breadcrumb}>
           <LeftOutlined /> <span>Back to home</span>
         </div>
       </Link>
-     
+      */}
       <Card bordered={false} style={{ marginTop: '20px' }}>
         <div className={styles.alert}>
           <InfoCircleFilled />

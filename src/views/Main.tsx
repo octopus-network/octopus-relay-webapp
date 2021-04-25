@@ -2,27 +2,27 @@ import React from "react";
 
 import { DownloadOutlined, SelectOutlined } from '@ant-design/icons';
 
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import Header from "../components/Header";
 
 import styled from "styled-components";
 
 const Content = styled.div`
-  min-height: calc(100% - 155px);
-  .container {
-    padding: 15px;
-  }
+  min-height: calc(100% - 166px);
 `;
 
 const Footer = styled.div`
   .container {
     line-height: 20px;
     border-top: 1px solid #eee;
-    padding: 15px;
     display: flex;
-    font-size: 12px;
+    font-size: 13px;
+    padding: 15px 0;
     justify-content: space-between;
     color: #9c9c9c;
+    a {
+      color: #9c9c9c;
+    }
     a:hover {
       text-decoration: underline;
     }
@@ -31,13 +31,16 @@ const Footer = styled.div`
 `;
 
 function Main(): React.ReactElement {
+  const location = useLocation();
+  let pathname = location.pathname.split('/')[1];
+
   return (
     <>
       <Header />
-      <Content>
-        <div className="container">
-          <Outlet />
-        </div>
+      <Content style={{
+        minHeight: pathname == 'home' ? 'calc(100% - 91px)' : 'calc(100% - 166px)'
+      }}>
+        <Outlet />
       </Content>
       <Footer>
         <div className="container">

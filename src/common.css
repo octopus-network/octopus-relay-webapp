@@ -14,7 +14,7 @@ html {
 }
 body {
   background-color: #f2f7fb!important;
-  background-image: url('./assets/background.png');
+  /* background-image: url('./assets/background.png'); */
   background-size: 100% auto;
   background-repeat: no-repeat;
   background-position: center 35%;
@@ -31,7 +31,7 @@ p {
 }
 
 .container {
-  max-width: 920px;
+  max-width: 1024px;
   margin: 0 auto;
   box-sizing: border-box;
 }
@@ -49,6 +49,9 @@ p {
 .ant-table-tbody > tr {
   cursor: pointer;
 }
+.ant-tag {
+  margin-right: 0!important;
+}
 
 .ant-dropdown-menu-item {
   padding: 10px 20px!important;
@@ -64,6 +67,7 @@ p {
   bottom: 0;
   width: auto;
 }
+
 .ant-dropdown-menu {
   box-shadow: rgb(0 0 0 / 10%) 0px 3px 12px -1px!important;
 }

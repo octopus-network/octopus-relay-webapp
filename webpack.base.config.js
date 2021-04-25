@@ -107,7 +107,7 @@ function createWebpack (ENV, context) {
                 lessOptions: {
                   modifyVars: { 
                     '@primary-color': '#53ab90',
-                    '@linnk-color': '#096dd9',
+                    '@link-color': '#53ab90',
                     '@border-radius-base': '3px',
                     '@border-color-base': '#e8e8e8',
                     '@btn-border-radius-base': '20px',

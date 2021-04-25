@@ -67,16 +67,16 @@ function Wallet(): React.ReactElement {
   }, []);
 
   return (
-    <div>
+    <div className="container" style={{ padding: '20px 0' }}>
       <div className={styles.title}>
-        <DollarCircleFilled />
+       
         <span>OCT Wallet</span>
       </div>
-      <div className={styles.breadcrumb}>
+      {/* <div className={styles.breadcrumb}>
         <Link to='/'>
           <HomeOutlined /> <span>Home</span>
         </Link>
-      </div>
+      </div> */}
       <Card bordered={false} className={styles.wrapper}>
         {
           window.accountId ?

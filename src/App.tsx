@@ -9,6 +9,7 @@ import Wallet from './views/Wallet';
 import Register from './views/Register';
 import Update from './views/Update';
 
+import AppchainList from './views/AppchainList';
 import Appchain from './views/Appchain';
 
 function App(): React.ReactElement {
@@ -20,8 +21,9 @@ function App(): React.ReactElement {
             <Route path='' element={<Navigate to='home' />} />
             <Route path='home' element={<Home />} />
             <Route path='wallet' element={<Wallet />} />
-            <Route path='register' element={<Register />} />
+            <Route path='appchain/register' element={<Register />} />
             <Route path='update/:id' element={<Update />} />
+            <Route path='appchain' element={<AppchainList />} />
             <Route path='appchain/:id' element={<Appchain />} />
           </Route>
           

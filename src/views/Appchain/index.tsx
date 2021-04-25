@@ -2,8 +2,11 @@ import React, { useState, useEffect, useCallback } from "react";
 
 import { utils } from 'near-api-js';
 import { useParams } from 'react-router-dom';
-import { Card, Descriptions, message, Table, Button } from "antd";
-import { LeftOutlined, PlusCircleFilled, RightOutlined, SelectOutlined, CopyOutlined } from "@ant-design/icons";
+import { Card, Descriptions, message, Table, Button, PageHeader } from "antd";
+import { 
+  LeftOutlined, DribbbleOutlined, RightOutlined, SelectOutlined, CopyOutlined,
+  GithubOutlined,
+} from "@ant-design/icons";
 
 import { Link } from 'react-router-dom';
 
@@ -138,43 +141,44 @@ function Appchain(): React.ReactElement {
   }
   
   return (
-    <div>
+    <div className="container" style={{ padding: '20px 0' }}>
       
-      <div className={styles.breadcrumb}>
+      {/* <div className={styles.breadcrumb}>
         <Link to='/'>
           <div>
             <LeftOutlined /> <span>Back to home</span>
           </div>
         </Link>
-      </div>
+      </div> */}
+      {/* <div className={styles.header}>
+        <div className={styles.left}>
+          <span className={styles.name}>{appchain?.appchain_name || 'loading...' }</span>
+          <span className={styles.desc}>Appchain ID: {appchain?.id}</span>
+        </div>
+      </div> */}
+      <PageHeader 
+        style={{ padding: '20px 0' }}
+        backIcon={false}
+        title={appchain?.appchain_name || 'Loading...'}
+        subTitle={`ID: ${appchain ? appchain.id : ''}`}
+        extra={[
+          appchain?.website_url && <a href={appchain.website_url} target="_blank">
+            <DribbbleOutlined style={{ fontSize: '20px' }} />
+          </a>,
+          appchain?.github_address && <a href={appchain.github_address} target="_blank">
+            <GithubOutlined style={{ fontSize: '20px' }} />
+          </a>,
+        ]}
+      />
     
-      <Card loading={isLoading} bordered={false} title='Detail' extra={
-        window.accountId == appchain?.founder_id &&
-        <Link to={`/update/${id}`}>
-          <Button type='primary'>Update</Button>
-        </Link>
-      }>
+      <Card loading={isLoading} bordered={false}>
         {
           appchain !== undefined &&
           <Descriptions column={2}>
-            <Descriptions.Item label="Appchain Id">{id}</Descriptions.Item>
             <Descriptions.Item label="Block Height">
               <a onClick={() => gotoBlock(appchain.block_height)}>#{appchain.block_height}</a>
             </Descriptions.Item>
-            <Descriptions.Item label="Appchain Name">{appchain.appchain_name}</Descriptions.Item>
             <Descriptions.Item label="Founder">{appchain.founder_id}</Descriptions.Item>
-            {
-              appchain.website_url &&
-              <Descriptions.Item label="Website">
-                <a target='_blank' href={appchain.website_url}>{appchain.website_url}</a>
-              </Descriptions.Item>
-            }
-            {
-              appchain.github_address && 
-              <Descriptions.Item label="Github">
-                <a target='_blank' href={appchain.github_address}>{appchain.github_address}</a>
-              </Descriptions.Item>
-            }
             {
               appchain.chain_spec_url &&
               <Descriptions.Item label="Chain Spec">
@@ -241,7 +245,7 @@ function Appchain(): React.ReactElement {
             Index: {currValidatorSetIdx} <Button size="small" type="text" onClick={onNextIndex} disabled={currValidatorSetIdx >= appchainValidatorIdex} 
             icon={<RightOutlined />} /></span>} 
           bordered={false} loading={isLoading || isLoadingValidators}>
-          <Table columns={columns} rowKey={record => record.id} dataSource={validatorSet?.validators} pagination={false} />
+          <Table columns={columns} rowKey={record => record.account_id} dataSource={validatorSet?.validators} pagination={false} />
         </Card>
       </div>
     </div>
