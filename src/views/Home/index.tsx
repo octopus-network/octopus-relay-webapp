@@ -17,18 +17,11 @@ function Home(): React.ReactElement {
 
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
 
-  const [activeModalVisible, setActiveModalVisible] = useState<boolean>(false);
-  const [stakingModalVisible, setStakingModalVisible] = useState<boolean>(false);
-
   const [numberAppchains, setNumberAppchains] = useState<number>(0);
 
   const [stakedBalance, setStakedBalance] = useState<number>(0);
 
   const [appchains, setAppchains] = useState<any[]>();
-
-  const toggleStakingModalVisible = useCallback(() => {
-    setStakingModalVisible(!stakingModalVisible);
-  }, [stakingModalVisible]);
 
   const getSortedAppchains = useCallback(() => {
     setIsLoadingList(true);
@@ -88,6 +81,9 @@ function Home(): React.ReactElement {
   // initialize
   useEffect(() => {
     getSortedAppchains();
+    window.contract
+      .get_total_staked_balance()
+      .then(balance => setStakedBalance(balance));
 
     // check current account is admin or not
     if (window.accountId) {
@@ -179,19 +175,7 @@ function Home(): React.ReactElement {
           }
           </div>
         </div>
-        {/* <Card title="Appchains" extra={
-          isSignedIn &&
-          <Link to="/register">
-            <Button type="primary" icon={<PlusOutlined />}>Register</Button>
-          </Link>
-        } bordered={false}>
-          <Table rowKey={(record) => record.id} columns={columns} loading={isLoadingList || isLoading} 
-            dataSource={appchains} onRow={record => {
-              return {
-                onClick: event => navigate(`/appchain/${record.id}`)
-              }
-            }} />
-        </Card> */}
+       
       </div>
       
     </>
