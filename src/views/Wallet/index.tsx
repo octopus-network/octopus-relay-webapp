@@ -9,6 +9,7 @@ import { Link } from 'react-router-dom';
 import styles from './style.less';
 
 import SendModal from './SendModal';
+import {fromDecimals} from '../../utils';
 
 const BOATLOAD_OF_GAS = Big(3).times(10 ** 14).toFixed();
 
@@ -26,7 +27,9 @@ function Wallet(): React.ReactElement {
     setIsLoading(true);
     window.tokenContract?.storage_balance_of({
       account_id: window.accountId
-    }).then(data => {
+    }).then(oData => {
+      const data = Object.assign(oData, {total : fromDecimals(oData)});
+      console.log('data', data);
       if (!data) {
         setNeedRegister(true);
         setIsLoading(false);
@@ -34,7 +37,8 @@ function Wallet(): React.ReactElement {
       }
       window.tokenContract?.ft_balance_of({
         account_id: window.accountId
-      }).then(data => {
+      }).then(oData => {
+        const data = fromDecimals(oData);
         setIsLoading(false);
         setAccountBalance(data);
       });

@@ -12,7 +12,7 @@ function ActiveModal({ visible, onCancel, appchainId }): React.ReactElement {
     const { boot_nodes, rpc_endpoint } = values;
     setIsSubmiting(true);
 
-    window.contract.active_appchain(
+    window.contract.activate_appchain(
       {
         appchain_id: appchainId * 1,
         boot_nodes,

@@ -5,6 +5,7 @@ import { Modal, Form, Input, Button, Alert, message } from 'antd';
 import { LoadingOutlined } from '@ant-design/icons';
 
 import Big from 'big.js';
+import {toDecimals} from '../../utils';
 
 const BOATLOAD_OF_GAS = Big(3).times(10 ** 14).toFixed();
 
@@ -81,7 +82,7 @@ function SendModal({ visible, onCancel }) {
     window.tokenContract?.ft_transfer(
       {
         receiver_id: sendTo,
-        amount: amount + '',
+        amount: toDecimals(amount),
         memo: ''
       },
       BOATLOAD_OF_GAS,

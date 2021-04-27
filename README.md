@@ -6,7 +6,6 @@ Octopus Relay is part of the Octopus Network.
 
 This is the Webapp, you can also follow the [Smart Contract](https://github.com/octopus-network/octopus-relay-contract.git).
 
-
 ## Development
 
 ```bash
@@ -15,7 +14,7 @@ yarn dev
 
 ```
 
-## Build 
+## Build
 
 ```bash
 
@@ -35,9 +34,9 @@ We use netlify to deploy, please follow [this article](https://www.netlify.com/b
 export OCT_NETWORK="testnet"
 
 # Octopus relay contract id
-export OCT_RELAY_CONTRACT_NAME="dev-1617522041326-1812977"
+export OCT_RELAY_CONTRACT_NAME="dev-1619541852149-6042040"
 
 # Oct token contract id
-export OCT_TOKEN_CONTRACT_NAME="dev-1616962983544-1322706"
+export OCT_TOKEN_CONTRACT_NAME="dev-1618322195294-7281987"
 
 ```

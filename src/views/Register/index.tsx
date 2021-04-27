@@ -10,6 +10,7 @@ import Big from 'big.js';
 const BOATLOAD_OF_GAS = Big(3).times(10 ** 14).toFixed();
 
 import styles from './styles.less';
+import {toDecimals, fromDecimals} from '../../utils';
 
 function Register(): React.ReactElement {
   const urlParams = new URLSearchParams(window.location.search);
@@ -30,17 +31,16 @@ function Register(): React.ReactElement {
     }
     const { appchain_name, github_address, website_url } = values;
     setIsSubmiting(true);
-
+    
     window.tokenContract.ft_transfer_call(
       {
         receiver_id: window.contractName,
-        amount: miniumBondTokenAmount + '',
+        amount: toDecimals(miniumBondTokenAmount),
         msg: `register_appchain,${appchain_name},${website_url || ''},${github_address || ''}`
       },
       BOATLOAD_OF_GAS,
       1,
     ).then(() => {
-      
       window.location.reload();
     }).catch((err) => {
       setIsSubmiting(false);
@@ -54,7 +54,7 @@ function Register(): React.ReactElement {
     window.tokenContract?.ft_balance_of({
       account_id: window.accountId
     }).then(data => {
-      setAccountBalance(data);
+      setAccountBalance(fromDecimals(data));
     }).finally(() => setIsLoadingBalance(false));
 
   }, []);

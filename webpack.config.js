@@ -9,8 +9,9 @@ const ENV = process.env.NODE_ENV || 'development';
 const context = __dirname;
 
 const NETWORK = process.env.OCT_NETWORK || 'testnet';
-const RELAY_CONTRACT_NAME = process.env.OCT_RELAY_CONTRACT_NAME || process.env.CONTRACT_NAME || 'dev-1618284355026-5339538';
-const TOKEN_CONTRACT_NAME = process.env.OCT_TOKEN_CONTRACT_NAME || 'dev-1616962983544-1322706';
+const RELAY_CONTRACT_NAME = process.env.OCT_RELAY_CONTRACT_NAME || process.env.CONTRACT_NAME || 'dev-1619541852149-6042040';
+const TOKEN_CONTRACT_NAME = process.env.OCT_TOKEN_CONTRACT_NAME || 'dev-1618322195294-7281987';
+const TOKEN_DECIMAL = process.env.OCT_TOKEN_DECIMAL || 24;
 
 module.exports = merge(
   baseConfig(ENV, context),
@@ -26,7 +27,8 @@ module.exports = merge(
           walletUrl: `https://wallet.${NETWORK}.near.org`,
           helperUrl: `https://helper.${NETWORK}.near.org`,
           explorerUrl: `https://explorer.${NETWORK}.near.org`,
-          tokenContract: TOKEN_CONTRACT_NAME
+          tokenContract: TOKEN_CONTRACT_NAME,
+          tokenDecimal: 24
         }),
         inject: true,
         template: path.join(context, 'src/index.html')

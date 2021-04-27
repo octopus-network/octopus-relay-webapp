@@ -12,6 +12,7 @@ import Status from "../../components/Status";
 
 import StakingModal from './StakingModal';
 import ActiveModal from './ActiveModal';
+import { readableAppchains } from "../../utils";
 
 const BOATLOAD_OF_GAS = Big(3).times(10 ** 14).toFixed();
 
@@ -118,7 +119,8 @@ function Appchain(): React.ReactElement {
     setIsLoading(true);
     window.contract.get_num_appchains().then(num => window.contract.get_appchains({
       from_index: 0, limit: num
-    })).then(list => {
+    })).then(olist => {
+      const list = readableAppchains(olist);
       const t = []
       list.map((item, id) => {
         const t2 = {}

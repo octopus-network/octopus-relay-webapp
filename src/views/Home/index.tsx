@@ -9,6 +9,8 @@ import Overview from './Overview';
 
 import styles from './styles.less';
 
+import {fromDecimals,  readableAppchains } from "../../utils";
+
 function Home(): React.ReactElement {
 
   const navigate = useNavigate();
@@ -35,9 +37,11 @@ function Home(): React.ReactElement {
         }))
       }
       return Promise.all(promises);
-    }).then(appchains => {
+    }).then(oAppchains => {
       setIsLoadingList(false);
-      if (appchains.length <= 0) return;
+      if (oAppchains.length <= 0) return;
+
+      const appchains = readableAppchains(oAppchains);
 
       appchains.sort((a, b) => {
         const statusRank = {
@@ -66,6 +70,8 @@ function Home(): React.ReactElement {
         }
       });
 
+      console.log('appchains', appchains);
+
       setAppchains(appchains);
     }).catch(err => {
       console.log(err);
@@ -83,15 +89,13 @@ function Home(): React.ReactElement {
     getSortedAppchains();
     window.contract
       .get_total_staked_balance()
-      .then(balance => setStakedBalance(balance));
+      .then(balance => setStakedBalance(fromDecimals(balance)));
 
     // check current account is admin or not
     if (window.accountId) {
-      window.contract?.get_owner().then(owner => {
-        if (window.accountId == owner) {
-          setIsAdmin(true);
-        }
-      });
+      if (window.accountId == window.nearConfig.contractName) {
+        setIsAdmin(true);
+      }
     }
 
     let timer = setInterval(() => {

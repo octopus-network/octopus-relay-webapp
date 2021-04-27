@@ -17,6 +17,7 @@ import TokenBadge from "../../components/TokenBadge";
 import Status from "../../components/Status";
 
 import styles from './styles.less';
+import {readableAppchain} from '../../utils';
 
 function Appchain(): React.ReactElement {
   const { id } = useParams();
@@ -88,7 +89,7 @@ function Appchain(): React.ReactElement {
     ]).then(([appchain, idx]) => {
       console.log(appchain);
       setIsLoading(false);
-      setAppchain(appchain);
+      setAppchain(readableAppchain(appchain));
       setCurrValidatorSetIdx(idx);
       setAppchainValidatorIdx(idx);
       // getValidators(appchainId, idx);

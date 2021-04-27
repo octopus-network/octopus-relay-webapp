@@ -9,6 +9,8 @@ const BOATLOAD_OF_GAS = Big(3).times(10 ** 14).toFixed();
 
 import TokenBadge from "../../components/TokenBadge";
 
+import {toDecimals, fromDecimals} from "../../utils";
+
 function StakingModal({ visible, appchainId, onCancel }): React.ReactElement {
 
   const [appchain, setAppchain] = useState<any>();
@@ -34,8 +36,9 @@ function StakingModal({ visible, appchainId, onCancel }): React.ReactElement {
     setAppchainLoading(true);
     Promise.all([
         window.contract.get_appchain({ appchain_id: appchainId }),
-        window.contract.get_minium_staking_amount()
-      ]).then(([appchain, amount]) => {
+        window.contract.get_minium_staking_amount(),
+      ]).then(([appchain, oAmount]) => {
+        const amount = fromDecimals(oAmount);
         setAppchain(appchain);
         setAppchainLoading(false);
         console.log(appchain);
@@ -54,7 +57,7 @@ function StakingModal({ visible, appchainId, onCancel }): React.ReactElement {
     window.tokenContract.ft_transfer_call(
       {
         receiver_id: window.contractName,
-        amount: stakingAmount + '',
+        amount: toDecimals(stakingAmount),
         msg: `staking,${appchainId},${validatorId}`
       },
       BOATLOAD_OF_GAS,
@@ -74,7 +77,7 @@ function StakingModal({ visible, appchainId, onCancel }): React.ReactElement {
     window.tokenContract.ft_transfer_call(
       {
         receiver_id: window.contractName,
-        amount: stakingAmount + '',
+        amount: toDecimals(stakingAmount),
         msg: `staking_more,${appchainId}`
       },
       BOATLOAD_OF_GAS,
