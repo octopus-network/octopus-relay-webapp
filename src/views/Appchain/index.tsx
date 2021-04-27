@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 
 import { utils } from 'near-api-js';
 import { useParams } from 'react-router-dom';
-import { Card, Descriptions, message, Table, Button, Breadcrumb, Tabs, Empty } from "antd";
+import { Card, Descriptions, message, Table, Button, Breadcrumb, Tabs, ConfigProvider, Empty } from "antd";
 import { 
   LeftOutlined, DribbbleOutlined, RightOutlined, SelectOutlined, CopyOutlined,
   GithubOutlined, EditOutlined, CodeOutlined, UserOutlined, UpOutlined, DownOutlined, LinkOutlined
@@ -176,7 +176,7 @@ function Appchain(): React.ReactElement {
             }
             
             <Button type='primary' icon={<CodeOutlined />} 
-              disabled={ !appchain || appchain.status != 'Active' }>Extrinsics</Button>
+              disabled={ !appchain || appchain.status != 'Active' }>RPC Call</Button>
           </div>
         </div>
       </div>
@@ -255,27 +255,34 @@ function Appchain(): React.ReactElement {
               }
               
             </Descriptions.Item>
+            {
+              appchain && appchain.boot_nodes &&
+              <Descriptions.Item label="Boot Nodes">
+                <CopyToClipboard text={`${appchain.boot_nodes}`} onCopy={() => message.info('Copied!')}>
+                  <div style={{ cursor: 'pointer', display: 'flex' }}>
+                    <span style={{ flex: '1', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', maxWidth: '180px' }}>
+                      { appchain.boot_nodes }
+                    </span> 
+                    <span style={{ marginLeft: "5px", color: "#aaa" }}><CopyOutlined /></span>
+                  </div>
+                </CopyToClipboard>
+              </Descriptions.Item>
+            }
+            {
+              appchain && appchain.boot_nodes &&
+              <Descriptions.Item label="Rpc Endpoint">
+                <CopyToClipboard text={`${appchain.rpc_endpoint}`} onCopy={() => message.info('Copied!')}>
+                  <div style={{ cursor: 'pointer', display: 'flex' }}>
+                    <span style={{ flex: '1', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', maxWidth: '180px' }}>
+                      { appchain.rpc_endpoint }
+                    </span> 
+                    <span style={{ marginLeft: "5px", color: "#aaa" }}><CopyOutlined /></span>
+                  </div>
+                </CopyToClipboard>
+              </Descriptions.Item>
+            }
           </Descriptions>
-          {/* <div className={styles.info}>
-            <span className={styles.title}>Founder</span>
-            <span className={classnames(styles.value, styles.skeleton)}>{appchain?.founder_id}</span>
-          </div>
-          <div className={styles.divider} />
-          <div className={styles.info}>
-            <span className={styles.title}>Bonded</span>
-            <span className={classnames(styles.value, styles.skeleton)}>{appchain && appchain.bond_tokens + ' OCT'}</span>
-          </div>
-          <div className={styles.divider} />
-          <div>
-            <div className={styles.info}>
-              <span className={styles.title}>Chain Spec</span>
-              <span className={classnames(styles.value, styles.skeleton)}>{appchain ? appchain.chain_spec_url || 'Not Provided' : '' }</span>
-            </div>
-            <div className={styles.info}>
-              <span className={styles.title}>Chain Spec Hash</span>
-              <span className={classnames(styles.value, styles.skeleton)}>{appchain ? appchain.chain_spec_hash || 'Not Provided' : '' }</span>
-            </div>
-          </div> */}
+          
         </div>
       </div>
       
@@ -283,20 +290,26 @@ function Appchain(): React.ReactElement {
         <Card>
           <Tabs defaultActiveKey='blocks'>
             <Tabs.TabPane tab='Blocks' key='blocks'>
-              <Table columns={[
-                {
-                  title: 'Block'
-                },
-                {
-                  title: 'Hash'
-                },
-                {
-                  title: 'Extrinsics'
-                },
-                {
-                  title: 'Time'
-                }
-              ]} />
+              <ConfigProvider renderEmpty={() => {
+                return (
+                  <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description='Appchain is not ready' />
+                );
+              }}>
+                <Table columns={[
+                  {
+                    title: 'Block'
+                  },
+                  {
+                    title: 'Hash'
+                  },
+                  {
+                    title: 'Calls'
+                  },
+                  {
+                    title: 'Time'
+                  }
+                ]} />
+              </ConfigProvider>
             </Tabs.TabPane>
             <Tabs.TabPane tab='Validators' key='validators'>
               <Table columns={columns} rowKey={record => record.account_id} loading={isLoading || isLoadingValidators}

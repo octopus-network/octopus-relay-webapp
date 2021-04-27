@@ -162,7 +162,7 @@ function Appchain(): React.ReactElement {
       <div className={styles.title}>
         <h3 className={styles.text}>Appchains</h3>
         <Link to='/appchain/register'>
-          <Button type='primary' size='large' icon={<PlusOutlined />}>Register</Button>
+          <Button type='primary' icon={<PlusOutlined />}>Register</Button>
         </Link>
       </div>
       <Card bordered={false}>
