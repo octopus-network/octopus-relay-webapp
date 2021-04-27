@@ -13,7 +13,7 @@ html {
   
 }
 body {
-  background-color: #f2f7fb!important;
+  background-color: #f5f9fb!important;
   /* background-image: url('./assets/background.png'); */
   background-size: 100% auto;
   background-repeat: no-repeat;
@@ -74,4 +74,17 @@ p {
 
 .ant-dropdown-menu {
   box-shadow: rgb(0 0 0 / 10%) 0px 3px 12px -1px!important;
+}
+
+.ant-descriptions-row > th {
+  padding-bottom: 0px!important;
+}
+.ant-descriptions-item-label {
+  color: #9c9c9c!important;
+  font-size: 13px;
+}
+
+.ant-tabs-tabpane {
+  background: #fff;
+  
 }

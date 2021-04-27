@@ -2,15 +2,17 @@ import React, { useState, useEffect, useCallback } from "react";
 
 import { utils } from 'near-api-js';
 import { useParams } from 'react-router-dom';
-import { Card, Descriptions, message, Table, Button, PageHeader } from "antd";
+import { Card, Descriptions, message, Table, Button, Breadcrumb, Tabs, Empty } from "antd";
 import { 
   LeftOutlined, DribbbleOutlined, RightOutlined, SelectOutlined, CopyOutlined,
-  GithubOutlined,
+  GithubOutlined, EditOutlined, CodeOutlined, UserOutlined, UpOutlined, DownOutlined, LinkOutlined
 } from "@ant-design/icons";
 
 import { Link } from 'react-router-dom';
 
 import { CopyToClipboard } from 'react-copy-to-clipboard';
+import classnames from 'classnames';
+
 import TokenBadge from "../../components/TokenBadge";
 import Status from "../../components/Status";
 
@@ -142,111 +144,173 @@ function Appchain(): React.ReactElement {
   
   return (
     <div className="container" style={{ padding: '20px 0' }}>
-      
-      {/* <div className={styles.breadcrumb}>
-        <Link to='/'>
-          <div>
-            <LeftOutlined /> <span>Back to home</span>
-          </div>
-        </Link>
-      </div> */}
-      {/* <div className={styles.header}>
+      <div className={styles.title}>
         <div className={styles.left}>
-          <span className={styles.name}>{appchain?.appchain_name || 'loading...' }</span>
-          <span className={styles.desc}>Appchain ID: {appchain?.id}</span>
+          <div className={styles.breadcrumb}>
+            <Link to='/appchain'>Appchain</Link>
+            <span className={styles.arrow}><RightOutlined /></span>
+            <span className={classnames(styles.name, styles.skeleton)}>{ appchain?.appchain_name }</span>
+          </div>
+          <div className={styles.appchainName}>
+            <span className={classnames(styles.text, styles.skeleton)}>
+              { appchain?.appchain_name }
+            </span>
+            <span className={classnames(styles.status, styles[appchain?.status])}>
+              { appchain?.status }
+            </span>
+            {/* <div className={styles.vote}>
+              <span className={classnames(styles.btn, styles.up)}><UpOutlined /></span>
+              <span className={styles.num}>0</span>
+              <span className={classnames(styles.btn, styles.down)}><DownOutlined /></span>
+            </div> */}
+          </div>
+          
         </div>
-      </div> */}
-      <PageHeader 
-        style={{ padding: '20px 0' }}
-        backIcon={false}
-        title={appchain?.appchain_name || 'Loading...'}
-        subTitle={`ID: ${appchain ? appchain.id : ''}`}
-        extra={[
-          appchain?.website_url && <a href={appchain.website_url} target="_blank">
-            <DribbbleOutlined style={{ fontSize: '20px' }} />
-          </a>,
-          appchain?.github_address && <a href={appchain.github_address} target="_blank">
-            <GithubOutlined style={{ fontSize: '20px' }} />
-          </a>,
-        ]}
-      />
-    
-      <Card loading={isLoading} bordered={false}>
-        {
-          appchain !== undefined &&
-          <Descriptions column={2}>
-            <Descriptions.Item label="Block Height">
-              <a onClick={() => gotoBlock(appchain.block_height)}>#{appchain.block_height}</a>
-            </Descriptions.Item>
-            <Descriptions.Item label="Founder">{appchain.founder_id}</Descriptions.Item>
+        <div className={styles.right}>
+          <div className={styles.buttons}>
             {
-              appchain.chain_spec_url &&
-              <Descriptions.Item label="Chain Spec">
+              appchain && appchain.founder_id == window.accountId &&
+              <Link to={`/update/${id}`}>
+                <Button type='primary' icon={<EditOutlined />}>Update</Button>
+              </Link>
+            }
+            
+            <Button type='primary' icon={<CodeOutlined />} 
+              disabled={ !appchain || appchain.status != 'Active' }>Extrinsics</Button>
+          </div>
+        </div>
+      </div>
+      
+      <div className={styles.detail}>
+        <div className={styles.left}>
+          <div className={styles.baseInfo}>
+            <span className={classnames(styles.tag, styles.id, styles.skeleton)}>{ appchain && 'ID: ' + appchain.id }</span>
+            {
+              appchain &&
+              <span className={classnames(styles.tag, styles.block)}>
+                at block #{appchain.block_height}
+              </span>
+            }
+          </div>
+          <div className={styles.baseInfo}>
+            {
+              appchain &&
+              <a className={classnames(styles.tag, styles.link)} href={`${window.nearConfig.explorerUrl}/accounts/${appchain.founder_id}`} target='_blank'>
+                <UserOutlined /> {appchain.founder_id}
+              </a>
+            }
+            {
+              appchain?.website_url &&
+              <a className={classnames(styles.tag, styles.link)} href={appchain.website_url} target='_blank'>
+                <LinkOutlined /> Website
+              </a>
+            }
+            {
+              appchain?.github_address &&
+              <a className={classnames(styles.tag, styles.link)} href={appchain.github_address} target='_blank'>
+                <GithubOutlined /> Github
+              </a>
+            }
+          </div>
+        </div>
+        <div className={styles.right}>
+          <Descriptions column={3} layout="vertical" colon={false}>
+            <Descriptions.Item label="Bonded">
+              {
+                appchain ?
+                <span> { appchain.bond_tokens } OCT </span> :
+                <span className={styles.skeleton} style={{ width: '200px', height: '24px' }} />
+              }
+            </Descriptions.Item>
+            <Descriptions.Item label="Chain Spec">
+              {
+                appchain ?
+                appchain.chain_spec_hash ?
                 <CopyToClipboard text={`${appchain.chain_spec_url}`} onCopy={() => message.info('Copied!')}>
                   <div style={{ cursor: 'pointer', display: 'flex' }}>
-                    <span style={{ flex: '1', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', maxWidth: '240px' }}>
+                    <span style={{ flex: '1', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', maxWidth: '180px' }}>
                       { appchain.chain_spec_url }
                     </span> 
                     <span style={{ marginLeft: "5px", color: "#aaa" }}><CopyOutlined /></span>
                   </div>
-                </CopyToClipboard>
-              </Descriptions.Item>
-            }
-            {
-              appchain.chain_spec_hash &&
-              <Descriptions.Item label="Chain Spec Hash">
-                <CopyToClipboard text={`sha256:${appchain.chain_spec_hash}`} onCopy={() => message.info('Copied!')}>
+                </CopyToClipboard> :
+                <span>Not Provided</span> :
+                <span className={styles.skeleton} style={{ width: '200px', height: '24px' }} />
+              }
+            </Descriptions.Item>
+            <Descriptions.Item label="Chain Spec Hash">
+              {
+                appchain ?
+                appchain.chain_spec_hash ?
+                <CopyToClipboard text={`${appchain.chain_spec_hash}`} onCopy={() => message.info('Copied!')}>
                   <div style={{ cursor: 'pointer', display: 'flex' }}>
-                    <span style={{ flex: '1', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', maxWidth: '240px' }}>
-                      sha256:{ appchain.chain_spec_hash }
+                    <span style={{ flex: '1', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', maxWidth: '180px' }}>
+                      { appchain.chain_spec_hash }
                     </span> 
                     <span style={{ marginLeft: "5px", color: "#aaa" }}><CopyOutlined /></span>
                   </div>
-                </CopyToClipboard>
-              </Descriptions.Item>
-            }
-
-            {
-              appchain.status == 'Active' && appchain.boot_nodes &&
-              <Descriptions.Item label="Boot Nodes">
-                <CopyToClipboard text={appchain.boot_nodes} onCopy={() => message.info('Copied!')}>
-                  <div style={{ cursor: 'pointer', display: 'flex' }}>
-                    <span style={{ flex: '1', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', maxWidth: '240px' }}>
-                      { appchain.boot_nodes }
-                    </span> 
-                    <span style={{ marginLeft: "5px", color: "#aaa" }}><CopyOutlined /></span>
-                  </div>
-                </CopyToClipboard>
-              </Descriptions.Item>
-            }
-
-            {
-              appchain.status == 'Active' && appchain.rpc_endpoint &&
-              <Descriptions.Item label="RPC Endpoint">
-                <CopyToClipboard text={appchain.rpc_endpoint} onCopy={() => message.info('Copied!')}>
-                  <div style={{ cursor: 'pointer', display: 'flex' }}>
-                    <span style={{ flex: '1', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', maxWidth: '240px' }}>
-                      { appchain.rpc_endpoint }
-                    </span> 
-                    <span style={{ marginLeft: "5px", color: "#aaa" }}><CopyOutlined /></span>
-                  </div>
-                </CopyToClipboard>
-              </Descriptions.Item>
-            }
-           
-            <Descriptions.Item label="Bond Tokens">{appchain.bond_tokens} <TokenBadge /></Descriptions.Item>
-            <Descriptions.Item label="Status"><Status type={appchain.status} /></Descriptions.Item>
+                </CopyToClipboard> :
+                <span>Not Provided</span> :
+                <span className={styles.skeleton} style={{ width: '200px', height: '24px' }} />
+              }
+              
+            </Descriptions.Item>
           </Descriptions>
-        }
-      </Card>
-      <div style={{marginTop: "15px"}}>
-        <Card title={<span>Validators 
+          {/* <div className={styles.info}>
+            <span className={styles.title}>Founder</span>
+            <span className={classnames(styles.value, styles.skeleton)}>{appchain?.founder_id}</span>
+          </div>
+          <div className={styles.divider} />
+          <div className={styles.info}>
+            <span className={styles.title}>Bonded</span>
+            <span className={classnames(styles.value, styles.skeleton)}>{appchain && appchain.bond_tokens + ' OCT'}</span>
+          </div>
+          <div className={styles.divider} />
+          <div>
+            <div className={styles.info}>
+              <span className={styles.title}>Chain Spec</span>
+              <span className={classnames(styles.value, styles.skeleton)}>{appchain ? appchain.chain_spec_url || 'Not Provided' : '' }</span>
+            </div>
+            <div className={styles.info}>
+              <span className={styles.title}>Chain Spec Hash</span>
+              <span className={classnames(styles.value, styles.skeleton)}>{appchain ? appchain.chain_spec_hash || 'Not Provided' : '' }</span>
+            </div>
+          </div> */}
+        </div>
+      </div>
+      
+      <div style={{marginTop: "20px"}}>
+        <Card>
+          <Tabs defaultActiveKey='blocks'>
+            <Tabs.TabPane tab='Blocks' key='blocks'>
+              <Table columns={[
+                {
+                  title: 'Block'
+                },
+                {
+                  title: 'Hash'
+                },
+                {
+                  title: 'Extrinsics'
+                },
+                {
+                  title: 'Time'
+                }
+              ]} />
+            </Tabs.TabPane>
+            <Tabs.TabPane tab='Validators' key='validators'>
+              <Table columns={columns} rowKey={record => record.account_id} loading={isLoading || isLoadingValidators}
+                dataSource={validatorSet?.validators} pagination={false} />
+            </Tabs.TabPane>
+          </Tabs>
+        </Card>
+        {/* <Card title={<span>Validators 
           <Button type="text" disabled={currValidatorSetIdx <= 0} size="small" icon={<LeftOutlined />} onClick={onPrevIndex} /> 
             Index: {currValidatorSetIdx} <Button size="small" type="text" onClick={onNextIndex} disabled={currValidatorSetIdx >= appchainValidatorIdex} 
             icon={<RightOutlined />} /></span>} 
           bordered={false} loading={isLoading || isLoadingValidators}>
           <Table columns={columns} rowKey={record => record.account_id} dataSource={validatorSet?.validators} pagination={false} />
-        </Card>
+        </Card> */}
       </div>
     </div>
   );

@@ -50,7 +50,13 @@ const Wrapper = styled.div`
       
     }
   }
-  
+  .ant-btn-primary {
+    border: 1px solid rgba(255, 255, 255, 0);
+    background: rgba(255, 255, 255, .2);
+  }
+  .ant-btn-primary:hover {
+    background: rgba(255, 255, 255, .3);
+  }
   .avatar {
     cursor: pointer;
     background: rgba(255,255,255,.2);
