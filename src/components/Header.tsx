@@ -151,6 +151,14 @@ function Header(): React.ReactElement {
                   Docs
                 </a>
               </Menu.Item>
+              <Menu.Item key="guide">
+                <a
+                  href="https://github.com/octopus-network/pallet-octopus-appchain/blob/master/docs/Appchain_Guide.md"
+                  target="_blank"
+                >
+                  Guide
+                </a>
+              </Menu.Item>
             </Menu>
           </div>
         </div>
