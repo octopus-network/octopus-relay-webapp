@@ -9,8 +9,8 @@ const ENV = process.env.NODE_ENV || 'development';
 const context = __dirname;
 
 const NETWORK = process.env.OCT_NETWORK || 'testnet';
-const RELAY_CONTRACT_NAME = process.env.OCT_RELAY_CONTRACT_NAME || process.env.CONTRACT_NAME || 'dev-1619541852149-6042040';
-const TOKEN_CONTRACT_NAME = process.env.OCT_TOKEN_CONTRACT_NAME || 'dev-1618322195294-7281987';
+const RELAY_CONTRACT_NAME = process.env.OCT_RELAY_CONTRACT_NAME || process.env.CONTRACT_NAME || 'oct-relay.testnet';
+const TOKEN_CONTRACT_NAME = process.env.OCT_TOKEN_CONTRACT_NAME || 'oct-token.testnet';
 const TOKEN_DECIMAL = process.env.OCT_TOKEN_DECIMAL || 24;
 
 module.exports = merge(

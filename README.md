@@ -34,9 +34,9 @@ We use netlify to deploy, please follow [this article](https://www.netlify.com/b
 export OCT_NETWORK="testnet"
 
 # Octopus relay contract id
-export OCT_RELAY_CONTRACT_NAME="dev-1619541852149-6042040"
+export OCT_RELAY_CONTRACT_NAME="oct-relay.testnet"
 
 # Oct token contract id
-export OCT_TOKEN_CONTRACT_NAME="dev-1618322195294-7281987"
+export OCT_TOKEN_CONTRACT_NAME="oct-token.testnet"
 
 ```
