@@ -11,11 +11,11 @@ import {
   Col,
   Spin,
   message,
+  Tooltip,
 } from "antd";
 import { InfoCircleOutlined } from "@ant-design/icons";
 import {
   LeftOutlined,
-  PlusCircleFilled,
   InfoCircleFilled,
   QuestionCircleOutlined,
 } from "@ant-design/icons";
@@ -128,19 +128,22 @@ function Update(): React.ReactElement {
             <Input placeholder="Your chain spec url" size="large" />
           </Form.Item>
           <Form.Item
-            label="Chain Spec Hash"
+            label={
+              <>
+                <span style={{ marginRight: "5px" }}>Validator ID</span>
+                <Tooltip title="Chain Spec Hash, for example d3668fda6...0a9e641f0">
+                  <QuestionCircleOutlined
+                    style={{ color: "rgb(250, 173, 20)" }}
+                  />
+                </Tooltip>
+              </>
+            }
             name="chain_spec_hash"
             rules={[
               { required: true, message: "please input your chain spec hash" },
             ]}
           >
-            <Input
-              placeholder="Your chain spec hash, for example d3668fda6...0a9e641f0"
-              size="large"
-              prefix={
-                <InfoCircleOutlined style={{ color: "rgb(250, 173, 20)" }} />
-              }
-            />
+            <Input placeholder="Your chain spec hash" size="large" />
           </Form.Item>
           <Form.Item wrapperCol={{ span: 24 }}>
             <Row justify="space-between" align="middle">
