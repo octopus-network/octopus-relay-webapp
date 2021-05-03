@@ -1,3 +1,3 @@
 export default {
-  '0': require('./0.json')
+  '1': require('./1.json')
 }

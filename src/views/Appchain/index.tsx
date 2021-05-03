@@ -200,7 +200,7 @@ function Appchain(): React.ReactElement {
   const [totalIssuance, setTotalIssuance] = useState('0');
 
   const initAppchain = useCallback((socket) => {
-
+    console.log(customTypes[id]);
     setAppchainInitializing(true);
     const provider = new WsProvider(socket);
     const api = new ApiPromise({ provider, types: customTypes[id] || {} });
@@ -254,6 +254,12 @@ function Appchain(): React.ReactElement {
       unsubNewFinalizedHeads();
     }
    
+  }, []);
+
+  const onRPCCallOk = useCallback((res) => {
+    console.log(res);
+    setRPCModalVisible(false);
+    message.success('RPC Call Success!');
   }, []);
 
   return (
@@ -544,7 +550,7 @@ function Appchain(): React.ReactElement {
           </Tabs.TabPane>
         </Tabs>
       </div>
-      <RPCModal api={api} visible={rpcModalVisible} onOk={() => setRPCModalVisible(false)} 
+      <RPCModal api={api} visible={rpcModalVisible} onOk={onRPCCallOk} 
         onCancel={() => setRPCModalVisible(false)} />
     </div>
   );

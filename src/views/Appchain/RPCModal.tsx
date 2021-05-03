@@ -75,9 +75,10 @@ function RPCModal({ api, visible, onCancel, onOk }): React.ReactElement {
   }, [api, palletRPC, callable]);
 
   const txResHandler = (res) => {
-    setSubmiting(false);
-    console.log(res);
-    onOk && onOk();
+    if (res.isFinalized) {
+      setSubmiting(false);
+      onOk && onOk(res);
+    }
   }
 
   const txErrHandler = (err) => {
@@ -152,8 +153,6 @@ function RPCModal({ api, visible, onCancel, onOk }): React.ReactElement {
 
     const unsub = await txExecute.signAndSend(account.address, txResHandler)
       .catch(txErrHandler);
-
-    setSubmiting(false);
 
     setUnsub(() => unsub);
   }

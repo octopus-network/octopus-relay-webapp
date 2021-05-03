@@ -7,6 +7,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 
 function getHeaderByBlockNumber(api, num) {
+  
   return api.rpc.chain.getBlockHash(num)
     .then(hash => Promise.all([
       api.rpc.chain.getBlock(hash),
@@ -62,7 +63,7 @@ function BlockTable({ api, bestNumber, appchainId }): React.ReactElement {
         render: (text) => {
           return (
             <span>
-              {text.substr(0, 12)}...{text.slice(-12)}
+              {text.substr(0, 18)}...{text.slice(-18)}
             </span>
           );
         }
@@ -70,14 +71,14 @@ function BlockTable({ api, bestNumber, appchainId }): React.ReactElement {
       {
         title: 'Extrinsics',
         key: 'extrincs',
-        width: '30%',
+        width: '300px',
         render: (_, record) => {
           const { extrincs } = record;
           const tags = extrincs.map((extrinc, idx) => {
             const { method, section } = extrinc.registry.findMetaCall(extrinc.callIndex);
             return <span style={{ 
-              color: '#74ade7', background: '#f5f5fc', fontSize: '12px',
-              padding: '5px', borderRadius: '3px', marginLeft: '5px' 
+              color: '#74ade7', fontSize: '12px', marginBottom: '5px',
+              padding: '5px', borderRadius: '3px', marginLeft: '5px', whiteSpace: 'nowrap' 
             }} key={idx}>{section}.{method}()</span>
             // return <Link to={`/appchain/${appchainId}/extrinsic/${record.number}-${idx}`} key={extrinc.hash.toHex()}>
             //   <span style={{ 
@@ -86,7 +87,7 @@ function BlockTable({ api, bestNumber, appchainId }): React.ReactElement {
             //   }}>{section}.{method}()</span>
             //   </Link>
           });
-          return <div style={{ textAlign: 'right' }}>{tags}</div>
+          return <div style={{ textAlign: 'right', maxWidth: '300px' }}>{tags}</div>
         }
       }
     ];
