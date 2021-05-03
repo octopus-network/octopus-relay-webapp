@@ -1,5 +1,8 @@
 import React, { useState, useEffect, useCallback } from "react";
 
+import { ApiPromise, WsProvider } from '@polkadot/api';
+import { formatBalance } from '@polkadot/util';
+
 import { utils } from "near-api-js";
 import { useParams } from "react-router-dom";
 import {
@@ -13,7 +16,9 @@ import {
   ConfigProvider,
   Empty,
   Popover,
+  notification
 } from "antd";
+
 import {
   LeftOutlined,
   DribbbleOutlined,
@@ -27,6 +32,7 @@ import {
   UpOutlined,
   DownOutlined,
   LinkOutlined,
+  LoadingOutlined
 } from "@ant-design/icons";
 
 import { Link } from "react-router-dom";
@@ -34,11 +40,13 @@ import { Link } from "react-router-dom";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import classnames from "classnames";
 
-import TokenBadge from "../../components/TokenBadge";
-import Status from "../../components/Status";
+import customTypes from '../../customTypes';
 
 import styles from "./styles.less";
 import { readableAppchain } from "../../utils";
+
+import BlockTable from './BlockTable';
+import RPCModal from './RPCModal';
 
 function Appchain(): React.ReactElement {
   const { id } = useParams();
@@ -52,6 +60,10 @@ function Appchain(): React.ReactElement {
   const [currValidatorSetIdx, setCurrValidatorSetIdx] = useState<number>(0);
   const [appchainValidatorIdex, setAppchainValidatorIdx] = useState<number>(0);
   const [validatorSet, setValidatorSet] = useState<any>();
+
+  const [rpcModalVisible, setRPCModalVisible] = useState(false);
+
+  const [api, setApi] = useState<any>();
 
   const columns = [
     {
@@ -116,11 +128,14 @@ function Appchain(): React.ReactElement {
       window.contract.get_appchain({ appchain_id: appchainId }),
       window.contract.get_curr_validator_set_index({ appchain_id: appchainId }),
     ]).then(([appchain, idx]) => {
-      console.log(appchain);
       setIsLoading(false);
       setAppchain(readableAppchain(appchain));
       setCurrValidatorSetIdx(idx);
       setAppchainValidatorIdx(idx);
+      if (appchain.status == 'Active') {
+        initAppchain(appchain.rpc_endpoint);
+      }
+      // initAppchain('wss://barnacle-dev.rpc.testnet.oct.network:9944');
       // getValidators(appchainId, idx);
     });
   }, [id]);
@@ -177,12 +192,76 @@ function Appchain(): React.ReactElement {
       });
   };
 
+  const [appchainInitializing, setAppchainInitializing] = useState(false);
+  const [appchainInitialized, setAppchainInitialized] = useState(false);
+
+  const [finalizedBlock, setFinalizedBlock] = useState(0);
+  const [bestBlock, setBestBlock] = useState(0);
+  const [totalIssuance, setTotalIssuance] = useState('0');
+
+  const initAppchain = useCallback((socket) => {
+
+    setAppchainInitializing(true);
+    const provider = new WsProvider(socket);
+    const api = new ApiPromise({ provider, types: customTypes[id] || {} });
+
+    api.on('connected', () => {
+      console.log('connected');
+    });
+
+    let unsubNewHeads = () => {};
+    let unsubNewFinalizedHeads = () => {};
+
+    api.on('ready', async () => {
+      setAppchainInitializing(false);
+      if (api.isReady) {
+        setAppchainInitialized(true);
+        setApi(api);
+
+        // subscriptions
+        unsubNewHeads = await api.rpc.chain.subscribeNewHeads((lastHeader) => {
+          setBestBlock(lastHeader.number.toNumber());
+        });
+
+        unsubNewFinalizedHeads = await api.rpc.chain.subscribeFinalizedHeads((finalizedHeader) => {
+          setFinalizedBlock(finalizedHeader.number.toNumber());
+        });
+
+        const totalIssuance = await api.query.balances?.totalIssuance();
+        setTotalIssuance(
+          formatBalance(
+            totalIssuance, { 
+              decimals: api.registry?.chainDecimals[0],
+              withUnit: false 
+            }
+          ) + api.registry?.chainTokens[0]
+        );
+        
+      }
+    });
+
+    api.on('error', err => {
+      setAppchainInitializing(false);
+      setAppchainInitialized(false);
+      notification.error({
+        message: 'Error',
+        description: err.message
+      });
+    });
+
+    return () => {
+      unsubNewHeads();
+      unsubNewFinalizedHeads();
+    }
+   
+  }, []);
+
   return (
-    <div className="container" style={{ padding: "20px 0" }}>
+    <div className='container' style={{ padding: '20px 0' }}>
       <div className={styles.title}>
         <div className={styles.left}>
           <div className={styles.breadcrumb}>
-            <Link to="/appchain">Appchain</Link>
+            <Link to='/appchain'>Appchain</Link>
             <span className={styles.arrow}>
               <RightOutlined />
             </span>
@@ -210,16 +289,17 @@ function Appchain(): React.ReactElement {
           <div className={styles.buttons}>
             {appchain && appchain.founder_id == window.accountId && (
               <Link to={`/update/${id}`}>
-                <Button type="primary" icon={<EditOutlined />}>
+                <Button type='primary' icon={<EditOutlined />}>
                   Update
                 </Button>
               </Link>
             )}
 
             <Button
-              type="primary"
+              type='primary'
               icon={<CodeOutlined />}
-              disabled={!appchain || appchain.status != "Active"}
+              disabled={!appchainInitialized}
+              onClick={() => setRPCModalVisible(true)}
             >
               RPC Call
             </Button>
@@ -233,7 +313,7 @@ function Appchain(): React.ReactElement {
             <span
               className={classnames(styles.tag, styles.id, styles.skeleton)}
             >
-              {appchain && "ID: " + appchain.id}
+              {appchain && 'ID: ' + appchain.id}
             </span>
             {appchain && (
               <span className={classnames(styles.tag, styles.block)}>
@@ -246,7 +326,7 @@ function Appchain(): React.ReactElement {
               <a
                 className={classnames(styles.tag, styles.link)}
                 href={`${window.nearConfig.explorerUrl}/accounts/${appchain.founder_id}`}
-                target="_blank"
+                target='_blank'
               >
                 <UserOutlined /> {appchain.founder_id}
               </a>
@@ -255,7 +335,7 @@ function Appchain(): React.ReactElement {
               <a
                 className={classnames(styles.tag, styles.link)}
                 href={appchain.website_url}
-                target="_blank"
+                target='_blank'
               >
                 <LinkOutlined /> Website
               </a>
@@ -264,7 +344,7 @@ function Appchain(): React.ReactElement {
               <a
                 className={classnames(styles.tag, styles.link)}
                 href={appchain.github_address}
-                target="_blank"
+                target='_blank'
               >
                 <GithubOutlined /> Github
               </a>
@@ -412,58 +492,60 @@ function Appchain(): React.ReactElement {
           </Descriptions>
         </div>
       </div>
-
-      <div style={{ marginTop: "20px" }}>
-        <Card>
-          <Tabs defaultActiveKey="blocks">
-            <Tabs.TabPane tab="Blocks" key="blocks">
-              <ConfigProvider
-                renderEmpty={() => {
-                  return (
-                    <Empty
-                      image={Empty.PRESENTED_IMAGE_SIMPLE}
-                      description="Appchain is not ready"
-                    />
-                  );
-                }}
-              >
-                <Table
-                  columns={[
-                    {
-                      title: "Block",
-                    },
-                    {
-                      title: "Hash",
-                    },
-                    {
-                      title: "Calls",
-                    },
-                    {
-                      title: "Time",
-                    },
-                  ]}
-                />
-              </ConfigProvider>
-            </Tabs.TabPane>
-            <Tabs.TabPane tab="Validators" key="validators">
-              <Table
-                columns={columns}
-                rowKey={(record) => record.account_id}
-                loading={isLoading || isLoadingValidators}
-                dataSource={validatorSet?.validators}
-                pagination={false}
-              />
-            </Tabs.TabPane>
-          </Tabs>
-        </Card>
-        {/* <Card title={<span>Validators 
-          <Button type="text" disabled={currValidatorSetIdx <= 0} size="small" icon={<LeftOutlined />} onClick={onPrevIndex} /> 
-            Index: {currValidatorSetIdx} <Button size="small" type="text" onClick={onNextIndex} disabled={currValidatorSetIdx >= appchainValidatorIdex} 
-            icon={<RightOutlined />} /></span>} 
-          bordered={false} loading={isLoading || isLoadingValidators}>
-          <Table columns={columns} rowKey={record => record.account_id} dataSource={validatorSet?.validators} pagination={false} />
-        </Card> */}
+      <div className={styles.chainStates}>
+        {
+          isLoading || appchainInitializing ?
+          <div className={styles.loading} style={{ height: '62px' }}>
+            <LoadingOutlined />
+          </div> :
+          appchainInitialized ?
+          <>
+          <div className={styles.statistic}>
+            <span className={styles.num}>{finalizedBlock}</span>
+            <em className={styles.desc}>Finalized</em>
+          </div>
+          <div className={styles.statistic}>
+            <span className={styles.num}>{bestBlock}</span>
+            <em className={styles.desc}>Best</em>
+          </div>
+          <div className={styles.statistic}>
+            <span className={styles.num}>{totalIssuance}</span>
+            <em className={styles.desc}>Total Issuance</em>
+          </div>
+          </> :
+          <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} style={{ flex: 1, margin: '0', height: '62px' }}
+            description='Appchain is not ready' />
+        }
+        
       </div>
+      <div className={styles.explorer} style={{ marginTop: '30px' }}>
+        <Tabs defaultActiveKey="blocks">
+          <Tabs.TabPane tab="Blocks" key="blocks">
+
+            {
+              isLoading || appchainInitializing ?
+              <div className={styles.loading} style={{ height: '200px' }}>
+                <LoadingOutlined />
+              </div> :
+              appchainInitialized ?
+              <BlockTable api={api} bestNumber={bestBlock} appchainId={id} /> :
+              <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description='Appchain is not ready' />
+            }
+
+          </Tabs.TabPane>
+          <Tabs.TabPane tab="Validators" key="validators">
+            <Table
+              columns={columns}
+              rowKey={(record) => record.account_id}
+              loading={isLoading || isLoadingValidators}
+              dataSource={validatorSet?.validators}
+              pagination={false}
+            />
+          </Tabs.TabPane>
+        </Tabs>
+      </div>
+      <RPCModal api={api} visible={rpcModalVisible} onOk={() => setRPCModalVisible(false)} 
+        onCancel={() => setRPCModalVisible(false)} />
     </div>
   );
 }

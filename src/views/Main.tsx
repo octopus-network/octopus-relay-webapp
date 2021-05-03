@@ -38,7 +38,8 @@ function Main(): React.ReactElement {
     <>
       <Header />
       <Content style={{
-        minHeight: pathname == 'home' ? 'calc(100% - 91px)' : 'calc(100% - 166px)'
+        minHeight: pathname == 'home' ? 'calc(100% - 91px)' : 'calc(100% - 166px)',
+        paddingBottom: '30px'
       }}>
         <Outlet />
       </Content>

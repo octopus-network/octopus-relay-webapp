@@ -79,9 +79,7 @@ function Home(): React.ReactElement {
           }
         });
 
-        console.log("appchains", appchains);
-
-        setAppchains(appchains);
+        setAppchains(appchains.slice(0,5));
       })
       .catch((err) => {
         console.log(err);
@@ -155,7 +153,7 @@ function Home(): React.ReactElement {
           <div className={styles.content}>
             {isLoadingList ? (
               <>
-                {[0, 1, 2, 3, 4].map((_, idx) => {
+                {[0, 1].map((_, idx) => {
                   return (
                     <Row className={styles.skeleton} key={idx}>
                       <Col span={11}>

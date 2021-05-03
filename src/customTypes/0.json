@@ -1,0 +1,48 @@
+{
+  "Address": "MultiAddress",
+  "LookupSource": "MultiAddress",
+  "InfoId": "u64",
+  "CommentId": "u64",
+  "CountryKey": "Text",
+  "TargetKey": "Text",
+  "SpaceKey": "Text",
+  "Identity": {
+    "avatar": "Text",
+    "displayName": "Text",
+    "legalName": "Text",
+    "email": "Text",
+    "web": "Text",
+    "twitter": "Text",
+    "wechat": "Text",
+    "judged": "bool"
+  },
+  "Info": {
+    "id": "InfoId",
+    "country": "CountryKey",
+    "space": "SpaceKey",
+    "thumb": "Text",
+    "title": "Text",
+    "content": "Text",
+    "images": "Text",
+    "price": "Balance",
+    "creator": "AccountId",
+    "block": "BlockNumber",
+    "status": "u8"
+  },
+  "Space": {
+    "key": "Text",
+    "icon": "Text",
+    "name": "Text",
+    "description": "Text",
+    "order": "u32",
+    "creator": "AccountId",
+    "block": "BlockNumber",
+    "status": "u8"
+  },
+  "Comment": {
+    "target": "TargetKey",
+    "content": "Text",
+    "creator": "AccountId",
+    "block": "BlockNumber"
+  }
+}

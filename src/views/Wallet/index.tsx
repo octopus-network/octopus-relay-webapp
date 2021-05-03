@@ -28,7 +28,7 @@ function Wallet(): React.ReactElement {
     window.tokenContract?.storage_balance_of({
       account_id: window.accountId
     }).then(oData => {
-      const data = Object.assign(oData, {total : fromDecimals(oData)});
+      const data = oData ? Object.assign(oData, {total : fromDecimals(oData)}) : null;
       console.log('data', data);
       if (!data) {
         setNeedRegister(true);

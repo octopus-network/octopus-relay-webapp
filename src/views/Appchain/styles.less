@@ -139,3 +139,47 @@
   border-radius: 3px;
   background: #eee;
 }
+
+.chainStates {
+  display: flex;
+  padding: 30px 20px;
+  background: #fff;
+  border: 1px solid #eee;
+  margin-top: 15px;
+  .statistic {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    &:not(:last-child) {
+      border-right: 1px solid #eee;
+    }
+    .num {
+      font-size: 26px;
+      font-weight: 500;
+    }
+    .desc {
+      font-size: 13px;
+      color: #9c9c9c;
+      font-style: normal;
+    }
+  }
+}
+
+.explorer {
+  padding: 20px;
+  background: #fff;
+  border: 1px solid #eee;
+}
+
+.loading {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  :global {
+    .anticon {
+      font-size: 32px;
+    }
+  }
+}

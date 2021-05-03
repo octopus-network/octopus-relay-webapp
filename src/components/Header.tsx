@@ -141,7 +141,7 @@ function Header(): React.ReactElement {
                 <Link to="/home">Home</Link>
               </Menu.Item>
               <Menu.Item key="appchain">
-                <Link to="/appchain">Appchain</Link>
+                <Link to="/appchain">Appchains</Link>
               </Menu.Item>
               <Menu.Item key="docs">
                 <a
