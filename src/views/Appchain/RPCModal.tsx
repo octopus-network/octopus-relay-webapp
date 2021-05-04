@@ -20,7 +20,7 @@ function RPCModal({ api, visible, onCancel, onOk }): React.ReactElement {
   const [unsub, setUnsub] = useState<any>();
   const [submiting, setSubmiting] = useState(false);
 
-  const [inputParams, setInputPrams] = useState([]);
+  const [inputParams, setInputParams] = useState([]);
   const [paramFields, setParamFields] = useState([]);
 
   const [appchainAccounts, setAppchainAccounts] = useState([]);
@@ -137,6 +137,8 @@ function RPCModal({ api, visible, onCancel, onOk }): React.ReactElement {
     const injected = await web3FromSource(account.source);
     api.setSigner(injected.signer);
 
+    console.log(paramFields, inputParams);
+
     const transformed = transformParams(paramFields, inputParams);
     // transformed can be empty parameters
 
@@ -165,12 +167,12 @@ function RPCModal({ api, visible, onCancel, onOk }): React.ReactElement {
     signedTx();
   }
 
-  const onPalletCallableParamChange = (t, v) => {
+  const onPalletCallableParamChange = (n, t, v) => {
 
-    setInputPrams((params) => {
-      const inputParams = [...params];
-      inputParams.push({ type: t, value: v });
-      return inputParams;
+    setInputParams((params) => {
+      let tmpIdx = paramFields.findIndex(p => p.name == n);
+      params[tmpIdx] = { type: t, value: v };
+      return params;
     });
 
   }
@@ -244,7 +246,7 @@ function RPCModal({ api, visible, onCancel, onOk }): React.ReactElement {
                 paramFields.map(({ name, type }, idx) => (
                   <div key={idx} style={{ marginBottom: '10px' }}>
                     <Input addonBefore={<span>{name}</span>} placeholder={type} 
-                      onChange={e => onPalletCallableParamChange(type, e.target.value)} />
+                      onChange={e => onPalletCallableParamChange(name, type, e.target.value)} />
                   </div>
                 ))
               }
