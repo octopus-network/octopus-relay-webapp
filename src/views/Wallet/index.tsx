@@ -1,17 +1,19 @@
 import React, { useEffect, useState, useCallback } from "react";
 
-import { Card, Spin, Button, Result, message } from 'antd';
-import { HomeOutlined, DollarCircleFilled } from '@ant-design/icons';
+import { Card, Spin, Button, Result, message } from "antd";
+import { HomeOutlined, DollarCircleFilled } from "@ant-design/icons";
 
-import Big from 'big.js';
+import Big from "big.js";
 
-import { Link } from 'react-router-dom';
-import styles from './style.less';
+import { Link } from "react-router-dom";
+import styles from "./style.less";
 
-import SendModal from './SendModal';
-import {fromDecimals} from '../../utils';
+import SendModal from "./SendModal";
+import { fromDecimals } from "../../utils";
 
-const BOATLOAD_OF_GAS = Big(3).times(10 ** 14).toFixed();
+const BOATLOAD_OF_GAS = Big(3)
+  .times(10 ** 14)
+  .toFixed();
 
 function Wallet(): React.ReactElement {
   const [accountBalance, setAccountBalance] = useState(0);
@@ -25,25 +27,30 @@ function Wallet(): React.ReactElement {
   useEffect(() => {
     if (!window.accountId) return;
     setIsLoading(true);
-    window.tokenContract?.storage_balance_of({
-      account_id: window.accountId
-    }).then(oData => {
-      const data = oData ? Object.assign(oData, {total : fromDecimals(oData)}) : null;
-      console.log('data', data);
-      if (!data) {
-        setNeedRegister(true);
-        setIsLoading(false);
-        return;
-      }
-      window.tokenContract?.ft_balance_of({
-        account_id: window.accountId
-      }).then(oData => {
-        const data = fromDecimals(oData);
-        setIsLoading(false);
-        setAccountBalance(data);
+    window.tokenContract
+      ?.storage_balance_of({
+        account_id: window.accountId,
+      })
+      .then((oData) => {
+        const data = oData
+          ? Object.assign(oData, { total: fromDecimals(oData) })
+          : null;
+        console.log("data", data);
+        if (!data) {
+          setNeedRegister(true);
+          setIsLoading(false);
+          return;
+        }
+        window.tokenContract
+          ?.ft_balance_of({
+            account_id: window.accountId,
+          })
+          .then((oData) => {
+            const data = fromDecimals(oData);
+            setIsLoading(false);
+            setAccountBalance(data);
+          });
       });
-    });
-
   }, [window.accountId]);
 
   const onSend = useCallback(() => {
@@ -56,24 +63,28 @@ function Wallet(): React.ReactElement {
 
   const onRegister = useCallback(() => {
     setIsRegistering(true);
-    window.tokenContract?.storage_deposit(
-      {
-        account_id: window.accountId,
-      },
-      BOATLOAD_OF_GAS,
-      Big(1).times(10 ** 22).toFixed(),
-    ).then(() => {
-      window.location.reload();
-    }).catch((err) => {
-      setIsRegistering(false);
-      message.error(err.toString());
-    })
+    window.tokenContract
+      ?.storage_deposit(
+        {
+          account_id: window.accountId,
+        },
+        BOATLOAD_OF_GAS,
+        Big(1)
+          .times(10 ** 22)
+          .toFixed()
+      )
+      .then(() => {
+        window.location.reload();
+      })
+      .catch((err) => {
+        setIsRegistering(false);
+        message.error(err.toString());
+      });
   }, []);
 
   return (
-    <div className="container" style={{ padding: '20px 0' }}>
+    <div className="container" style={{ padding: "20px 0" }}>
       <div className={styles.title}>
-       
         <span>OCT Wallet</span>
       </div>
       {/* <div className={styles.breadcrumb}>
@@ -82,40 +93,61 @@ function Wallet(): React.ReactElement {
         </Link>
       </div> */}
       <Card bordered={false} className={styles.wrapper}>
-        {
-          window.accountId ?
+        {window.accountId ? (
           <>
             <Spin spinning={isLoading}>
-              {
-                needRegister ?
+              {needRegister ? (
                 <div>
                   <Result
                     title="Account not registered"
                     subTitle="Your account need to register on the OCT token contract, so that you can manage your OCT token"
                     extra={
-                      <Button type="primary" key="console" onClick={onRegister} loading={isRegistering}>Register</Button>
+                      <Button
+                        type="primary"
+                        key="console"
+                        onClick={onRegister}
+                        loading={isRegistering}
+                      >
+                        Register
+                      </Button>
                     }
                   />
-                </div> :
+                </div>
+              ) : (
                 <>
-                  <div className={styles.user}>{ window.accountId || 'Loading...' }</div>
+                  <div className={styles.user}>
+                    {window.accountId || "Loading..."}
+                  </div>
                   <div className={styles.balance}>
-                    <span className={styles.amount}>{ (accountBalance*1).toFixed(2) }</span>
-                    <span className={styles.token}>OCT Balance</span>
+                    <span className={styles.amount}>
+                      {(accountBalance * 1).toFixed(2)}
+                    </span>
+                    <span className={styles.token}>OCT</span>
                   </div>
                   <div className={styles.buttons}>
-                    <Button type='primary' size='large' style={{ width: '200px' }} onClick={onSend}>Send</Button>
-                    <Button type='ghost' size='large' style={{ marginLeft: '30px', width: '200px' }}>Receive</Button>
+                    <Button
+                      type="primary"
+                      size="large"
+                      style={{ width: "200px" }}
+                      onClick={onSend}
+                    >
+                      Send
+                    </Button>
+                    <Button
+                      type="ghost"
+                      size="large"
+                      style={{ marginLeft: "30px", width: "200px" }}
+                    >
+                      Receive
+                    </Button>
                   </div>
                 </>
-              }
+              )}
             </Spin>
-          </> :
-          <Result
-            status="warning"
-            title="Please login first"
-          />
-        }
+          </>
+        ) : (
+          <Result status="warning" title="Please login first" />
+        )}
       </Card>
       <SendModal visible={sendModalVisible} onCancel={toggleSendModalVisible} />
     </div>

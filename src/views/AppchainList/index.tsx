@@ -116,7 +116,7 @@ function Appchain(): React.ReactElement {
                   }}
                   type="ghost"
                 >
-                  Staking
+                  Stake
                 </Button>
               ) : null)}
             <RightOutlined

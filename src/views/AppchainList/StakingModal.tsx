@@ -265,7 +265,7 @@ function StakingModal({ visible, appchainId, onCancel }): React.ReactElement {
                 loading={isSubmiting}
                 size="large"
               >
-                Staking
+                Stake
               </Button>
             </Form.Item>
           </Form>

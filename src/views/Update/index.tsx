@@ -130,7 +130,7 @@ function Update(): React.ReactElement {
           <Form.Item
             label={
               <>
-                <span style={{ marginRight: "5px" }}>Validator ID</span>
+                <span style={{ marginRight: "5px" }}>Chain Spec Hash</span>
                 <Tooltip title="Chain Spec Hash, for example d3668fda6...0a9e641f0">
                   <QuestionCircleOutlined
                     style={{ color: "rgb(250, 173, 20)" }}
