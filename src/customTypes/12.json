@@ -1,7 +1,120 @@
 {
+    "AccountInfo": "AccountInfoWithDualRefCount",
     "Address": "MultiAddress",
     "LookupSource": "MultiAddress",
-    "Public": "AccountId",
+    "AccountIdOf": "AccountId",
+    "EthereumAddress": "[u8; 20]",
+    "EthereumAddressOf": "EthereumAddress",
+    "HashOf": "H256",
+    "CountryRegionCode": "Text",
+    "CityCode": "Text",
+    "LabInfo": {
+      "name": "Text",
+      "email": "Text",
+      "country": "Text",
+      "region": "Text",
+      "city": "Text",
+      "address": "Text",
+      "latitude": "Option<Text>",
+      "longitude": "Option<Text>",
+      "profile_image": "Option<Text>"
+    },
+    "Lab": {
+      "account_id": "AccountId",
+      "services": "Vec<H256>",
+      "info": "LabInfo"
+    },
+    "LabOf": "Lab",
+    "ServiceInfo": {
+      "name": "Text",
+      "price": "u128",
+      "category": "Text",
+      "description": "Text",
+      "long_description": "Option<Text>",
+      "image": "Option<Text>"
+    },
+    "Service": {
+      "id": "H256",
+      "owner_id": "AccountId",
+      "info": "ServiceInfo"
+    },
+    "ServiceOf": "Service",
+    "ServiceInfoOf": "ServiceInfo",
+    "ServiceIdOf": "H256",
+    "OrderStatus": {
+      "_enum": [
+        "Unpaid",
+        "Paid",
+        "Fulfilled",
+        "Refunded",
+        "Cancelled"
+      ]
+    },
+    "Moment": "u64",
+    "MomentOf": "Moment",
+    "Order": {
+      "id": "H256",
+      "service_id": "H256",
+      "customer_id": "AccountId",
+      "seller_id": "AccountId",
+      "customer_eth_address": "EthereumAddress",
+      "seller_eth_address": "EthereumAddress",
+      "dna_sample_tracking_id": "Text",
+      "status": "OrderStatus",
+      "created_at": "u64",
+      "updated_at": "u64"
+    },
+    "OrderOf": "Order",
+    "OrderIdsOf": "Vec<H256>",
+    "DnaSampleStatus": {
+      "_enum": [
+        "Sending",
+        "Received",
+        "Rejected",
+        "Processing",
+        "Processed",
+        "Success",
+        "Failed"
+      ]
+    },
+    "DnaSampleTrackingId": "Text",
+    "DnaSample": {
+      "tracking_id": "Text",
+      "lab_id": "AccountId",
+      "owner_id": "AccountId",
+      "status": "DnaSampleStatus"
+    },
+    "DnaSampleOf": "DnaSample",
+    "DnaTestResult": {
+      "tracking_id": "Text",
+      "lab_id": "Option<AccountId>",
+      "owner_id": "AccountId",
+      "comments": "Option<Text>",
+      "result_link": "Option<Text>",
+      "report_link": "Option<Text>"
+    },
+    "DnaTestResultOf": "DnaTestResult",
+    "DnaTestResultSubmission": {
+      "comments": "Option<Text>",
+      "result_link": "Option<Text>",
+      "report_link": "Option<Text>"
+    },
+    "Escrow": {
+      "account_id": "AccountId",
+      "order_id": "H256",
+      "amount_to_pay": "u128",
+      "amount_paid": "u128",
+      "expires_at": "u64"
+    },
+    "EscrowOf": "Escrow",
+    "Role": {
+      "_enum": [
+        "Customer",
+        "Lab",
+        "Hospital",
+        "Doctor"
+      ]
+    },
     "Validator": {
       "id": "AccountId",
       "weight": "u64"
@@ -15,4 +128,4 @@
       "block_number": "BlockNumber",
       "val_set": "ValidatorSet"
     }
-  }
+}
