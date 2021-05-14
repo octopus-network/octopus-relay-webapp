@@ -202,7 +202,7 @@ function Appchain(): React.ReactElement {
   const initAppchain = useCallback((socket) => {
     console.log(customTypes[id]);
     setAppchainInitializing(true);
-    const provider = new WsProvider(socket);
+    let provider = new WsProvider(socket);
     const api = new ApiPromise({ provider, types: customTypes[id] || {} });
 
     api.on('connected', () => {
@@ -240,18 +240,21 @@ function Appchain(): React.ReactElement {
       }
     });
 
-    api.on('error', err => {
+    api.once('error', err => {
       setAppchainInitializing(false);
       setAppchainInitialized(false);
+      api.disconnect();
       notification.error({
         message: 'Error',
         description: err.message
       });
+
     });
 
     return () => {
       unsubNewHeads();
       unsubNewFinalizedHeads();
+     
     }
    
   }, []);
