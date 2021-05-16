@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Modal, Input, Button, Row, Col, Table, Select, Space, Form, Tag, message } from 'antd';
 
-import { ArrowRightOutlined, ArrowLeftOutlined } from '@ant-design/icons';
+import { ArrowRightOutlined, LeftOutlined, VerticalAlignBottomOutlined } from '@ant-design/icons';
 
 import axios from 'axios';
 
@@ -13,13 +13,29 @@ const apiHost = 'https://1fus85rip4.execute-api.ap-northeast-1.amazonaws.com';
 
 const wsHost = 'wss://chuubnzu9i.execute-api.ap-northeast-1.amazonaws.com';
 
+function getCloudVendorKey(appchainId, cloudVendor, accessKey) {
+  return `appchain-${appchainId}-cloud-${cloudVendor}-${accessKey}`;
+}
+
+function getLocalStorageKey(appchainId) {
+  return `cloud-vendor-key-appchain-${appchainId}`;
+}
+
+function getCloudVendor(vendorKey) {
+  return (vendorKey||'-').split('-')[3]||'';
+}
+
+function getAccessKey(vendorKey) {
+  return (vendorKey||'-').split('-').pop();
+}
+
 function DeployModal({ appchain, visible, onCancel }): React.ReactElement {
 
-  const smallWidth = 520, bigWidth = 760;
+  const smallWidth = 520, bigWidth = 960;
 
   const [wsClient, setWSClient] = useState<any>();
 
-  const [cloudVendorAndKey, setCloudVendorAndKey] = useState('');
+  const [cloudVendorKey, setCloudVendorKey] = useState('');
 
   const [cloudVendor, setCloudVendor] = useState('aws');
   const [accessKey, setAccessKey] = useState('');
@@ -32,9 +48,12 @@ function DeployModal({ appchain, visible, onCancel }): React.ReactElement {
   const [isDeploying, setIsDeploying] = useState(false);
   const [isLoadingList, setIsLoadingList] = useState(false);
 
+  const [isWSReady, setIsWSReady] = useState(false);
+
   const [applying, setApplying] = useState({});
   const [destroying, setDestroying] = useState({});
   const [detailLoading, setDetailLoading] = useState({});
+  const [deleting, setDeleting] = useState({});
 
   const [deployLogs, setDeployLogs] = useState({});
 
@@ -44,15 +63,15 @@ function DeployModal({ appchain, visible, onCancel }): React.ReactElement {
 
   useEffect(() => {
     if (visible) {
-      let tmpKey = window.localStorage.getItem('cloud-vendor-and-access-key');
-      setCloudVendorAndKey(tmpKey);
+      let tmpKey = window.localStorage.getItem(getLocalStorageKey(appchain.id));
+      setCloudVendorKey(tmpKey);
       if (tmpKey) {
         getTasks(tmpKey);
         initWSClient(tmpKey);
       }
     } else {
       setDeployingNew(false);
-      setCloudVendorAndKey('');
+      setCloudVendorKey('');
       setAccessKey('');
       setCloudVendor('aws');
       setIsDeploying(false);
@@ -64,13 +83,13 @@ function DeployModal({ appchain, visible, onCancel }): React.ReactElement {
   }, [visible]);
 
   useEffect(() => {
-    setModalWidth(cloudVendorAndKey ? bigWidth : smallWidth);
-  }, [cloudVendorAndKey]);
+    setModalWidth(cloudVendorKey ? bigWidth : smallWidth);
+  }, [cloudVendorKey]);
 
   const columns = [
     {
       title: 'UUID',
-      key: 'UUID',
+      key: 'uuid',
       dataIndex: 'uuid'
     },
     {
@@ -91,6 +110,19 @@ function DeployModal({ appchain, visible, onCancel }): React.ReactElement {
       }
     },
     {
+      title: 'Instance',
+      key: 'instance',
+      render: (record) => {
+        const { instance } = record;
+        if (!instance) {
+          return <span>Not Ready</span>
+        }
+        return (
+          <span>{instance.user}@{instance.ip}</span>
+        );
+      }
+    },
+    {
       title: 'Action',
       key: 'action',
       render: (record) => {
@@ -99,20 +131,28 @@ function DeployModal({ appchain, visible, onCancel }): React.ReactElement {
         const isDestroying = destroying[uuid];
 
         const isLoadingDetail = detailLoading[uuid];
+        const isDeleting = deleting[uuid];
 
         return (
           <Space>
             {
-              (state == '0' || state == '11') && 
+              (state == '0') && 
               <Button loading={isApplying} onClick={() => onApply(uuid)}>Apply</Button>
             }
             {
               (state == '12') &&
-              <Button loading={isDestroying} onClick={() => onDestroying(uuid)}>Destroy</Button>
+              <>
+              <Button loading={isDestroying} onClick={() => onDestroy(uuid)}>Destroy</Button>
+              <Button href={record.instance.ssh_key} icon={<VerticalAlignBottomOutlined />}>RSA</Button>
+              </>
             }
             {
               (state == '10' || state == '20') &&
               <Button loading={isLoadingDetail} onClick={() => onShowLog(uuid)}>Deploy Log</Button>
+            }
+            {
+              (state == '11' || state == '21' || state == '22') &&
+              <Button loading={isDeleting} onClick={() => onDelete(uuid)}>Delete</Button>
             }
           </Space>
         );
@@ -121,16 +161,17 @@ function DeployModal({ appchain, visible, onCancel }): React.ReactElement {
   ];
 
   const onAccess = () => {
-    let vendorAndKey = cloudVendor + '-' + accessKey;
-    window.localStorage.setItem('cloud-vendor-and-access-key', vendorAndKey);
-    setCloudVendorAndKey(vendorAndKey);
+    let vendorKey = getCloudVendorKey(appchain.id, cloudVendor, accessKey);
+
+    window.localStorage.setItem(getLocalStorageKey(appchain.id), vendorKey);
+    setCloudVendorKey(vendorKey);
     setModalWidth(bigWidth);
-    getTasks(vendorAndKey);
+    getTasks(vendorKey);
   }
 
   const onLogout = () => {
-    window.localStorage.removeItem('cloud-vendor-and-access-key');
-    setCloudVendorAndKey('');
+    window.localStorage.removeItem(getLocalStorageKey(appchain.id));
+    setCloudVendorKey('');
     setAccessKey('');
   }
 
@@ -153,7 +194,7 @@ function DeployModal({ appchain, visible, onCancel }): React.ReactElement {
       const res = await axios({
         method: 'get',
         url: `${apiHost}/api/tasks`,
-        headers: { authorization: auth || cloudVendorAndKey }
+        headers: { authorization: auth || cloudVendorKey }
       }).then(res => res.data);
 
       console.log(res)
@@ -181,7 +222,7 @@ function DeployModal({ appchain, visible, onCancel }): React.ReactElement {
       const res = await axios({
         method: 'post',
         url: `${apiHost}/api/tasks`,
-        headers: { authorization: cloudVendorAndKey },
+        headers: { authorization: cloudVendorKey },
         data: {
           chainspec_url: chain_spec_url,
           chainspec_checksum: 'sha256:' + chain_spec_hash,
@@ -212,7 +253,7 @@ function DeployModal({ appchain, visible, onCancel }): React.ReactElement {
       const res = await axios({
         method: 'put',
         url: `${apiHost}/api/tasks/${uuid}`,
-        headers: { authorization: cloudVendorAndKey },
+        headers: { authorization: cloudVendorKey },
         data: { action: 'apply' }
       }).then(res => res.data);
       console.log(res);
@@ -227,7 +268,7 @@ function DeployModal({ appchain, visible, onCancel }): React.ReactElement {
     setApplying({ ...applying, [uuid]: false });
   }
 
-  const onDestroying = async (uuid) => {
+  const onDestroy = async (uuid) => {
     setDestroying({ ...destroying, [uuid]: true });
 
     try {
@@ -235,7 +276,7 @@ function DeployModal({ appchain, visible, onCancel }): React.ReactElement {
       const res = await axios({
         method: 'put',
         url: `${apiHost}/api/tasks/${uuid}`,
-        headers: { authorization: cloudVendorAndKey },
+        headers: { authorization: cloudVendorKey },
         data: { action: 'destroy' }
       }).then(res => res.data);
       console.log(res);
@@ -250,44 +291,70 @@ function DeployModal({ appchain, visible, onCancel }): React.ReactElement {
     setDestroying({ ...destroying, [uuid]: false });
   }
 
+  const onDelete = async (uuid) => {
+    setDeleting({ ...deleting, [uuid]: true });
+
+    try {
+
+      const res = await axios({
+        method: 'DELETE',
+        url: `${apiHost}/api/tasks/${uuid}`,
+        headers: { authorization: cloudVendorKey }
+      }).then(res => res.data);
+      console.log(res);
+      
+      message.success('Delete success!');
+      getTasks();
+    } catch(err) {
+      message.error('Delete error!');
+      console.log(err);
+    }
+
+    setDeleting({ ...deleting, [uuid]: false });
+  }
+
   const initWSClient = (auth) => {
-    const client = new W3CWebsocket(`${wsHost}/api?token=${auth||cloudVendorAndKey}`);
+    const client = new W3CWebsocket(`${wsHost}/api?token=${auth||cloudVendorKey}`);
     setWSClient(client);
 
     client.onerror = function(err) {
       console.log(err);
       console.log('ws error');
+      setIsWSReady(false);
     };
 
     client.onopen = function() {
       console.log('ws open');
+      setIsWSReady(true);
     }
 
     client.onclose = function() {
       console.log('ws close');
+      setIsWSReady(false);
     }
 
     client.onmessage = function(e) {
       if (typeof e.data !== 'string') {
         return;
       }
+      let tmpLogs = deployLogs;
       try {
         const res = JSON.parse(e?.data);
-        
         const { uuid, data } = res;
-        if (deployLogs[uuid]) {
-          deployLogs[uuid].push(JSON.stringify(data));
+        if (tmpLogs[uuid]) {
+          tmpLogs[uuid].push(JSON.stringify(data));
         } else {
-          deployLogs[uuid] = [JSON.stringify(data)];
+          tmpLogs[uuid] = [JSON.stringify(data)];
         }
       } catch(e) { console.log(e) }
       setTimeout(() => {
         if (logBoxRef.current) {
+          setDeployLogs(tmpLogs);
           let ele = logBoxRef.current as any;
           if (!ele) return;
           ele.scrollTop = ele.scrollHeight;
         }
-      }, 100);
+      }, 300);
     }
     
   }
@@ -298,7 +365,7 @@ function DeployModal({ appchain, visible, onCancel }): React.ReactElement {
       const res = await axios({
         method: 'get',
         url: `${apiHost}/api/tasks/${uuid}`,
-        headers: { authorization: cloudVendorAndKey }
+        headers: { authorization: cloudVendorKey }
       }).then(res => res.data);
 
       console.log(res);
@@ -316,6 +383,7 @@ function DeployModal({ appchain, visible, onCancel }): React.ReactElement {
 
   const onHidLog = () => {
     setShowLogUUID('');
+    getTasks();
   }
  
   return (
@@ -323,17 +391,21 @@ function DeployModal({ appchain, visible, onCancel }): React.ReactElement {
       destroyOnClose={true} footer={null} width={modalWidth} style={{ transition: 'width .3s ease' }}>
      
       {
-        cloudVendorAndKey ?
+        cloudVendorKey ?
         <div>
           {
             showLogUUID ?
             <div>
               <div style={{ display: 'flex', alignItems: 'cemter' }}>
-                <Button onClick={onHidLog} style={{ marginRight: '15px' }}><ArrowLeftOutlined /> Back</Button>
+                <Button onClick={onHidLog} style={{ marginRight: '15px' }} type="primary" icon={<LeftOutlined />} />
                 <h3 style={{ fontSize: '20px' }}>Deploy Log</h3>
               </div>
               <div className={styles.deployLog} ref={logBoxRef}>
                 <p className={styles.logLine}>Polling {showLogUUID} logs...</p>
+                {
+                  !isWSReady &&
+                  <p className={styles.logLine}>Websocket is not ready, please try to refresh this page.</p>
+                }
                 {
                   deployLogs[showLogUUID] && deployLogs[showLogUUID].map((line, idx) => {
                     return (
@@ -348,14 +420,14 @@ function DeployModal({ appchain, visible, onCancel }): React.ReactElement {
               {
                 deployingNew ?
                 <h3 style={{ fontSize: '20px' }}>Deploy New Validator</h3> :
-                <h3 style={{ fontSize: '20px' }}>Cloud / { cloudVendorAndKey?.split('-')[0].toUpperCase() }</h3>
+                <h3 style={{ fontSize: '20px' }}>Cloud / { getCloudVendor(cloudVendorKey) }</h3>
               }
               {
                 !deployingNew &&
                 <Row align="middle">
                   <Col flex={1}>
                     <span style={{ fontSize: '14px', color: '#9c9c9c' }}>Access Key:</span>
-                    <span style={{ fontSize: '14px', marginLeft: '10px' }}>{ cloudVendorAndKey?.split('-')[1] }</span>
+                    <span style={{ fontSize: '14px', marginLeft: '10px' }}>{ getAccessKey(cloudVendorKey) }</span>
                   </Col>
                   <Col>
                     <Space>
@@ -370,8 +442,8 @@ function DeployModal({ appchain, visible, onCancel }): React.ReactElement {
               {
                 deployingNew ?
                 <Form layout="horizontal" labelCol={{ span: 6 }} labelAlign="left" onFinish={onDeploy} initialValues={{
-                  cloudVendor: cloudVendorAndKey ? cloudVendorAndKey.split('-')[0] : '',
-                  accessKey: cloudVendorAndKey ? cloudVendorAndKey.split('-')[1] : ''
+                  cloudVendor: getCloudVendor(cloudVendorKey),
+                  accessKey: getAccessKey(cloudVendorKey)
                 }}>
                   <Form.Item label="Coud Vendor" name="cloudVendor">
                     <Input placeholder="Cloud vendor" disabled size="large" />
@@ -394,7 +466,8 @@ function DeployModal({ appchain, visible, onCancel }): React.ReactElement {
                     </Row>
                   </Form.Item>
                 </Form> :
-                <Table columns={columns} loading={isLoadingList} dataSource={taskList} rowKey={(record) => record.uuid} />
+                <Table columns={columns} loading={isLoadingList} dataSource={taskList} 
+                  scroll={{ x: 900 }} rowKey={(record) => record.uuid} />
               }
             </div>
           </>
