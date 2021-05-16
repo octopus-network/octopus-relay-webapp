@@ -87,7 +87,7 @@ function BlockTable({ api, bestNumber, appchainId }): React.ReactElement {
             //   }}>{section}.{method}()</span>
             //   </Link>
           });
-          return <div style={{ textAlign: 'right', maxWidth: '300px' }}>{tags}</div>
+          return <div style={{ maxWidth: '300px' }}>{tags}</div>
         }
       }
     ];

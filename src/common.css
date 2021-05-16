@@ -42,10 +42,6 @@ p {
   border-bottom: none!important;
 }
 
-.ant-table-thead th:last-child {
-  text-align: right;
-}
-
 .ant-table-tbody > tr {
   cursor: pointer;
 }

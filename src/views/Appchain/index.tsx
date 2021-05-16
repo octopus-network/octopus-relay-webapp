@@ -30,7 +30,7 @@ import {
   CodeOutlined,
   UserOutlined,
   UpOutlined,
-  DownOutlined,
+  CloudServerOutlined,
   LinkOutlined,
   LoadingOutlined
 } from "@ant-design/icons";
@@ -47,6 +47,7 @@ import { readableAppchain } from "../../utils";
 
 import BlockTable from './BlockTable';
 import RPCModal from './RPCModal';
+import DeployModal from './DeployModal';
 
 function Appchain(): React.ReactElement {
   const { id } = useParams();
@@ -62,6 +63,7 @@ function Appchain(): React.ReactElement {
   const [validatorSet, setValidatorSet] = useState<any>();
 
   const [rpcModalVisible, setRPCModalVisible] = useState(false);
+  const [deployModalVisible, setDeployModalVisible] = useState(false);
 
   const [api, setApi] = useState<any>();
 
@@ -303,9 +305,16 @@ function Appchain(): React.ReactElement {
                 </Button>
               </Link>
             )}
-
+            <Button 
+              icon={<CloudServerOutlined />} 
+              disabled={!appchainInitialized}
+              onClick={() => setDeployModalVisible(true)}
+            >
+              Deploy Validator
+            </Button>
             <Button
               type='primary'
+              style={{ marginLeft: '15px' }}
               icon={<CodeOutlined />}
               disabled={!appchainInitialized}
               onClick={() => setRPCModalVisible(true)}
@@ -555,6 +564,7 @@ function Appchain(): React.ReactElement {
       </div>
       <RPCModal api={api} visible={rpcModalVisible} onOk={onRPCCallOk} 
         onCancel={() => setRPCModalVisible(false)} />
+      <DeployModal appchain={appchain} visible={deployModalVisible} onCancel={() => setDeployModalVisible(false)} />
     </div>
   );
 }
