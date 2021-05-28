@@ -143,6 +143,9 @@ function Header(): React.ReactElement {
               <Menu.Item key="appchain">
                 <Link to="/appchain">Appchains</Link>
               </Menu.Item>
+              <Menu.Item key="bridge">
+                <a href="https://birdge.oct.network" target="_blank">Bridge</a>
+              </Menu.Item>
               <Menu.Item key="docs">
                 <a
                   href="https://github.com/octopus-network/pallet-octopus-appchain#octopus-appchain-pallet"

@@ -130,6 +130,7 @@ function Appchain(): React.ReactElement {
       window.contract.get_appchain({ appchain_id: appchainId }),
       window.contract.get_curr_validator_set_index({ appchain_id: appchainId }),
     ]).then(([appchain, idx]) => {
+      console.log(appchain);
       setIsLoading(false);
       setAppchain(readableAppchain(appchain));
       setCurrValidatorSetIdx(idx);
