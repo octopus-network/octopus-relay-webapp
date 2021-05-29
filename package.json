@@ -53,6 +53,7 @@
     "react-dom": "^17.0.1",
     "react-router": "^6.0.0-alpha.5",
     "react-router-dom": "^6.0.0-alpha.5",
+    "require-all": "^3.0.0",
     "styled-components": "^5.2.1",
     "websocket": "^1.0.34"
   }

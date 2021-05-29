@@ -40,8 +40,6 @@ import { Link } from "react-router-dom";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import classnames from "classnames";
 
-import customTypes from '../../customTypes';
-
 import styles from "./styles.less";
 import { readableAppchain } from "../../utils";
 
@@ -50,7 +48,9 @@ import RPCModal from './RPCModal';
 import DeployModal from './DeployModal';
 
 function Appchain(): React.ReactElement {
+
   const { id } = useParams();
+
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const [appchain, setAppchain] = useState<any>();
@@ -130,13 +130,13 @@ function Appchain(): React.ReactElement {
       window.contract.get_appchain({ appchain_id: appchainId }),
       window.contract.get_curr_validator_set_index({ appchain_id: appchainId }),
     ]).then(([appchain, idx]) => {
-      console.log(appchain);
+   
       setIsLoading(false);
       setAppchain(readableAppchain(appchain));
       setCurrValidatorSetIdx(idx);
       setAppchainValidatorIdx(idx);
       if (appchain.status == 'Active') {
-        initAppchain(appchain.rpc_endpoint);
+        initAppchain(appchain);
       }
       // initAppchain('wss://barnacle-dev.rpc.testnet.oct.network:9944');
       // getValidators(appchainId, idx);
@@ -202,11 +202,16 @@ function Appchain(): React.ReactElement {
   const [bestBlock, setBestBlock] = useState(0);
   const [totalIssuance, setTotalIssuance] = useState('0');
 
-  const initAppchain = useCallback((socket) => {
-    console.log(customTypes[id]);
+  const initAppchain = async (appchain) => {
+    
+    let types = {};
+    try {
+      types = await require(`../../customTypes/${appchain.id}.json`);
+    } catch(err) {}
+    
     setAppchainInitializing(true);
-    let provider = new WsProvider(socket);
-    const api = new ApiPromise({ provider, types: customTypes[id] || {} });
+    let provider = new WsProvider(appchain.rpc_endpoint);
+    const api = new ApiPromise({ provider, types: types || {} });
 
     api.on('connected', () => {
       console.log('connected');
@@ -260,7 +265,7 @@ function Appchain(): React.ReactElement {
      
     }
    
-  }, []);
+  }
 
   const onRPCCallOk = useCallback((res) => {
     console.log(res);
