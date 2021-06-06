@@ -21,10 +21,11 @@ function App(): React.ReactElement {
             <Route path='' element={<Navigate to='home' />} />
             <Route path='home' element={<Home />} />
             <Route path='wallet' element={<Wallet />} />
-            <Route path='appchain/register' element={<Register />} />
+            <Route path='appchains/register' element={<Register />} />
             <Route path='update/:id' element={<Update />} />
-            <Route path='appchain' element={<AppchainList />} />
-            <Route path='appchain/:id' element={<Appchain />} />
+            <Route path='appchains' element={<AppchainList />} />
+            <Route path='appchains/:id' element={<Appchain />} />
+            <Route path='appchains/:id/:tab' element={<Appchain />} />
           </Route>
           
         </Routes>

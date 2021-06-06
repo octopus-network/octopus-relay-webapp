@@ -1,24 +1,15 @@
 import React, { useCallback, useEffect, useState } from "react";
 
-import { Button, Row, message, Card, Table } from "antd";
-import { PlusOutlined, RightOutlined } from "@ant-design/icons";
+import { Button, message, Pagination, Empty, Col, Row } from "antd";
+import { PlusOutlined, RightOutlined, LoadingOutlined } from "@ant-design/icons";
 
 import Big from "big.js";
 import { Link, useNavigate } from "react-router-dom";
 import styles from "./styles.less";
 
-import TokenBadge from "../../components/TokenBadge";
-import Status from "../../components/Status";
-
-import StakingModal from "./StakingModal";
-import ActiveModal from "./ActiveModal";
 import { readableAppchains } from "../../utils";
 
-const BOATLOAD_OF_GAS = Big(3)
-  .times(10 ** 14)
-  .toFixed();
-
-function Appchain(): React.ReactElement {
+function AppchainList(): React.ReactElement {
   const navigate = useNavigate();
 
   const [appchains, setAppchains] = useState<any[]>();
@@ -27,128 +18,44 @@ function Appchain(): React.ReactElement {
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const [appchainId, setAppchainId] = useState<number>(0);
+  const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
+  const [totalCount, setTotalCount] = useState(0);
 
-  const [activeModalVisible, setActiveModalVisible] = useState<boolean>(false);
-  const [stakingModalVisible, setStakingModalVisible] = useState<boolean>(
-    false
-  );
+  const loadPage = async (p) => {
+    setIsLoading(true);
+    const start = (p -1) * pageSize;
+    const res = await window.contract.get_appchains({
+      from_index: start,
+      limit: pageSize,
+    });
+    const list = readableAppchains(res);
+    const t = [];
+    list.map((item, id) => {
+      const t2 = {};
+      Object.assign(t2, { id }, item);
+      t.push(t2);
+    });
 
-  const toggleStakingModalVisible = useCallback(() => {
-    setStakingModalVisible(!stakingModalVisible);
-  }, [stakingModalVisible]);
+    setAppchains(t);
+    setIsLoading(false);
+  }
 
-  const columns = [
-    {
-      title: "ID",
-      dataIndex: "id",
-    },
-    {
-      title: "Name",
-      dataIndex: "appchain_name",
-    },
-    {
-      title: "Founder",
-      dataIndex: "founder_id",
-    },
-    {
-      title: "Validators",
-      key: "validators",
-      render: (_, fields) => {
-        const { validators } = fields;
-        return <span>{validators.length}</span>;
-      },
-    },
-    {
-      title: "Staked",
-      key: "Staked",
-      render: (_, fields) => {
-        const { validators } = fields;
-        let totalStaked = 0;
-        validators.map((v) => (totalStaked += v.staked_amount));
-        return (
-          <span>
-            {totalStaked} <TokenBadge />
-          </span>
-        );
-      },
-    },
-    {
-      title: "Status",
-      dataIndex: "status",
-      render: (text) => {
-        return <Status type={text} />;
-      },
-    },
-    {
-      title: "",
-      key: "action",
-      render: (text, fields) => {
-        const { id, validators, founder_id, status } = fields;
-
-        return (
-          <Row
-            justify="end"
-            align="middle"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {window.accountId &&
-              (isAdmin ? (
-                status == "Frozen" ? (
-                  <Button
-                    type="primary"
-                    onClick={() => activeAppchain(fields.id)}
-                  >
-                    Active
-                  </Button>
-                ) : status == "Active" ? (
-                  <Button
-                    type="ghost"
-                    onClick={() => freezeAppchain(fields.id)}
-                  >
-                    Freeze
-                  </Button>
-                ) : null
-              ) : window.accountId != founder_id ? (
-                <Button
-                  onClick={() => {
-                    setAppchainId(fields.id);
-                    toggleStakingModalVisible();
-                  }}
-                  type="ghost"
-                >
-                  Stake
-                </Button>
-              ) : null)}
-            <RightOutlined
-              style={{ marginLeft: "10px", fontSize: "14px", color: "#ccc" }}
-            />
-          </Row>
-        );
-      },
-    },
-  ];
+  useEffect(() => {
+    loadPage(page);
+  }, [page]);
 
   useEffect(() => {
     setIsLoading(true);
     window.contract
       .get_num_appchains()
-      .then((num) =>
-        window.contract.get_appchains({
-          from_index: 0,
-          limit: num,
-        })
-      )
-      .then((olist) => {
-        const list = readableAppchains(olist);
-        const t = [];
-        list.map((item, id) => {
-          const t2 = {};
-          Object.assign(t2, { id }, item);
-          t.push(t2);
-        });
-
-        setAppchains(t);
-        setIsLoading(false);
+      .then((num) => {
+        setTotalCount(num);
+        if (num > 0) {
+          setPage(1);
+        } else {
+          setIsLoading(false);
+        }
       })
       .catch((err) => {
         console.log(err);
@@ -158,47 +65,87 @@ function Appchain(): React.ReactElement {
 
     // check current account is admin or not
     if (window.accountId) {
+      
       if (window.accountId == window.nearConfig.contractName) {
         setIsAdmin(true);
       }
     }
   }, []);
 
-  const activeAppchain = function (appchainId) {
-    setAppchainId(appchainId);
-    setActiveModalVisible(true);
-  };
-
-  const freezeAppchain = function (appchainId) {
-    setIsLoading(true);
-    window.contract
-      .freeze_appchain(
-        {
-          appchain_id: appchainId,
-        },
-        BOATLOAD_OF_GAS,
-        0
-      )
-      .then(() => {
-        window.location.reload();
-      })
-      .catch((err) => {
-        setIsLoading(false);
-        message.error(err.toString());
-      });
-  };
-
   return (
     <div className="container" style={{ padding: "20px 0" }}>
       <div className={styles.title}>
         <h3 className={styles.text}>Appchains</h3>
-        <Link to="/appchain/register">
+        <Link to="/appchains/register">
           <Button type="primary" icon={<PlusOutlined />}>
-            Register
+            Appchain
           </Button>
         </Link>
       </div>
-      <Card bordered={false}>
+      <Row style={{ padding: '15px 25px', color: '#9c9c9c' }}>
+        <Col span={4}>Name</Col>
+        <Col span={5}>Founder</Col>
+        <Col span={5}>Validators</Col>
+        <Col span={5}>Staked</Col>
+        <Col span={4}>Status</Col>
+      </Row>
+      {
+        isLoading ?
+       
+        <div className={styles.loading}>
+          <LoadingOutlined />
+        </div> :
+
+        appchains?.length ?
+        <>
+          {appchains.map(({ id, founder_id, validators, bond_tokens, status }, idx) => {
+            
+            return (
+              <Row key={idx} className={styles.appchain} justify="center" 
+                onClick={(e) => navigate(`/appchains/${id}`)} align="middle">
+                <Col span={4} className={styles.name}>{id}</Col>
+                <Col span={5}>{founder_id}</Col>
+                <Col span={5}>{validators.length}</Col>
+                <Col span={5}>{bond_tokens} OCT</Col>
+                <Col span={4}>
+                  <span className={`${styles.status} ${styles[status]}`}>
+                    {status}
+                  </span>
+                </Col>
+                <Col span={1}>
+                  {/* <ActionButtons
+                    founder_id={founder_id}
+                    onActive={() => activeAppchain(id)}
+                    onFreeze={() => freezeAppchain(id)}
+                    onRemove={() => removeAppchain(id)}
+                    onStake={() => {
+                      setAppchainId(id);
+                      toggleStakingModalVisible();
+                    }}
+                  /> */}
+                  <Row align="middle" justify="end">
+                    <RightOutlined
+                      style={{ fontSize: "14px", color: "#ccc" }}
+                    />
+                  </Row>
+                </Col>
+              </Row>
+            );
+          })}
+          {
+            appchains?.length > pageSize &&
+            <Row justify="center" style={{ marginTop: 30 }}>
+              <Pagination current={page} pageSize={pageSize} onChange={p => {
+                setPage(p);
+              }} total={totalCount} />
+            </Row>
+          }
+        </> :
+        <div style={{ padding: 30 }}>
+          <Empty description={<span style={{ color: '#7c7c7c' }}>There is no appchains</span>} />
+        </div>
+      }
+      {/* <Card bordered={false}>
         <Table
           rowKey={(record) => record.id}
           columns={columns}
@@ -210,19 +157,10 @@ function Appchain(): React.ReactElement {
             };
           }}
         />
-      </Card>
-      <ActiveModal
-        appchainId={appchainId}
-        visible={activeModalVisible}
-        onCancel={() => setActiveModalVisible(false)}
-      />
-      <StakingModal
-        appchainId={appchainId}
-        visible={stakingModalVisible}
-        onCancel={toggleStakingModalVisible}
-      />
+      </Card> */}
+     
     </div>
   );
 }
 
-export default React.memo(Appchain);
+export default React.memo(AppchainList);

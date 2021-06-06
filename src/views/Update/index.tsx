@@ -38,8 +38,8 @@ function Update(): React.ReactElement {
 
   const onFinish = useCallback((values) => {
     const {
-      chain_spec_url,
-      chain_spec_hash,
+      github_release,
+      commit_id,
       website_url,
       github_address,
     } = values;
@@ -47,11 +47,13 @@ function Update(): React.ReactElement {
     window.contract
       .update_appchain(
         {
-          appchain_id: id * 1,
+          appchain_id: id,
           website_url: website_url || "",
           github_address: github_address || "",
-          chain_spec_url,
-          chain_spec_hash,
+          github_release,
+          commit_id,
+          chain_spec_url: '',
+          chain_spec_hash: '',
         },
         BOATLOAD_OF_GAS,
         0
@@ -68,15 +70,14 @@ function Update(): React.ReactElement {
   useEffect(() => {
     setIsLoading(true);
     window.contract
-      .get_appchain({ appchain_id: id * 1 })
+      .get_appchain({ appchain_id: id })
       .then((appchain) => {
         setAppchain(appchain);
         form.setFieldsValue({
-          appchain_name: appchain.appchain_name,
           website_url: appchain.website_url,
           github_address: appchain.github_address,
-          chain_spec_url: appchain.chain_spec_url,
-          chain_spec_hash: appchain.chain_spec_hash,
+          github_release: appchain.github_release,
+          commit_id: appchain.commit_id,
         });
       })
       .finally(() => setIsLoading(false));
@@ -103,54 +104,32 @@ function Update(): React.ReactElement {
         >
           <Form.Item
             label="Appchain name"
-            name="appchain_name"
-            rules={[
-              { required: true, message: "please input your appchain name" },
-            ]}
           >
             <span style={{ fontSize: "18px", color: "#9c9c9c" }}>
-              {appchain?.appchain_name}
+              {appchain?.id}
             </span>
           </Form.Item>
           <Form.Item label="Website" name="website_url">
             <Input placeholder="Your website url" size="large" />
           </Form.Item>
-          <Form.Item label="Github" name="github_address">
-            <Input placeholder="Your github address" size="large" />
+          <Form.Item label='Github' name='github_address' rules={[
+            { required: true, message: 'please input your github address' }
+          ]}>
+            <Input placeholder='github address' size='large' />
           </Form.Item>
-          <Form.Item
-            label="Chain Spec"
-            name="chain_spec_url"
-            rules={[
-              { required: true, message: "please input your chain spec url" },
-            ]}
-          >
-            <Input placeholder="Your chain spec url" size="large" />
+          <Form.Item label='Github release' name='github_release' rules={[
+            { required: true, message: 'please input your github release' }
+          ]}>
+            <Input placeholder='github release' size='large' />
           </Form.Item>
-          <Form.Item
-            label={
-              <>
-                <span style={{ marginRight: "5px" }}>Chain Spec Hash</span>
-                <Tooltip title="Chain Spec Hash, for example d3668fda6...0a9e641f0">
-                  <QuestionCircleOutlined
-                    style={{ color: "rgb(250, 173, 20)" }}
-                  />
-                </Tooltip>
-              </>
-            }
-            name="chain_spec_hash"
-            rules={[
-              { required: true, message: "please input your chain spec hash" },
-            ]}
-          >
-            <Input placeholder="Your chain spec hash" size="large" />
+          <Form.Item label='Commit id' name='commit_id' rules={[
+            { required: true, message: 'please input the commit id' }
+          ]}>
+            <Input placeholder='commit id' size='large' />
           </Form.Item>
           <Form.Item wrapperCol={{ span: 24 }}>
             <Row justify="space-between" align="middle">
-              <span style={{ color: "#faad14" }}>
-                <InfoCircleFilled /> When you update the appchain, its status
-                will change to frozen
-              </span>
+              <span />
               <Button
                 type="primary"
                 size="large"

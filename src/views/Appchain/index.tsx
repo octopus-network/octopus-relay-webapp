@@ -2,26 +2,26 @@ import React, { useState, useEffect, useCallback } from "react";
 
 import { ApiPromise, WsProvider } from '@polkadot/api';
 import { formatBalance } from '@polkadot/util';
+import { encodeAddress } from '@polkadot/util-crypto';
 
 import { utils } from "near-api-js";
-import { useParams } from "react-router-dom";
 import {
-  Card,
+  Row,
+  Col,
   Descriptions,
   message,
   Table,
   Button,
   Breadcrumb,
   Tabs,
-  ConfigProvider,
+  Popconfirm,
   Empty,
   Popover,
   notification
 } from "antd";
 
 import {
-  LeftOutlined,
-  DribbbleOutlined,
+  CheckOutlined,
   RightOutlined,
   SelectOutlined,
   CopyOutlined,
@@ -35,8 +35,8 @@ import {
   LoadingOutlined
 } from "@ant-design/icons";
 
-import { Link } from "react-router-dom";
-
+import { Link, useNavigate, useParams, useLocation } from "react-router-dom";
+import Big from "big.js";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import classnames from "classnames";
 
@@ -46,11 +46,18 @@ import { readableAppchain } from "../../utils";
 import BlockTable from './BlockTable';
 import RPCModal from './RPCModal';
 import DeployModal from './DeployModal';
+import ApproveModal from "./ApproveModal";
+import ActivateModal from "./ActivateModal";
+import StakeModal from "./StakeModal";
+
+const BOATLOAD_OF_GAS = Big(3)
+  .times(10 ** 14)
+  .toFixed();
 
 function Appchain(): React.ReactElement {
 
-  const { id } = useParams();
-
+  const { id, tab } = useParams();
+  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const [appchain, setAppchain] = useState<any>();
@@ -64,6 +71,9 @@ function Appchain(): React.ReactElement {
 
   const [rpcModalVisible, setRPCModalVisible] = useState(false);
   const [deployModalVisible, setDeployModalVisible] = useState(false);
+  const [approveModalVisible, setApproveModalVisible] = useState(false);
+  const [activateModalVisible, setActivateModalVisible] = useState(false);
+  const [stakeModalVisible, setStakeModalVisible] = useState(false);
 
   const [api, setApi] = useState<any>();
 
@@ -83,18 +93,19 @@ function Appchain(): React.ReactElement {
       },
     },
     {
-      title: "Appchain Validator Id",
+      title: "Appchain Validator Account",
       dataIndex: "id",
       key: "id",
-      render: (text) => {
+      render: (accountId) => {
+        const ss58Address = encodeAddress(accountId);
         return (
           <CopyToClipboard
-            text={text}
+            text={ss58Address}
             onCopy={() => message.info("Validator Id Copied!")}
           >
             <div style={{ cursor: "pointer" }}>
               <span>
-                {text.substr(0, 10)}...{text.substr(-10)}
+                {ss58Address.substr(0, 10)}...{ss58Address.substr(-10)}
               </span>
               <span style={{ marginLeft: "5px", color: "#aaa" }}>
                 <CopyOutlined />
@@ -122,15 +133,12 @@ function Appchain(): React.ReactElement {
 
   useEffect(() => {
     setIsLoading(true);
-    let appchainId = 0;
-    if (!isNaN(id as any)) {
-      appchainId = +id;
-    }
+    
     Promise.all([
-      window.contract.get_appchain({ appchain_id: appchainId }),
-      window.contract.get_curr_validator_set_index({ appchain_id: appchainId }),
+      window.contract.get_appchain({ appchain_id: id }),
+      window.contract.get_curr_validator_set_index({ appchain_id: id }),
     ]).then(([appchain, idx]) => {
-   
+      console.log(appchain);
       setIsLoading(false);
       setAppchain(readableAppchain(appchain));
       setCurrValidatorSetIdx(idx);
@@ -201,6 +209,7 @@ function Appchain(): React.ReactElement {
   const [finalizedBlock, setFinalizedBlock] = useState(0);
   const [bestBlock, setBestBlock] = useState(0);
   const [totalIssuance, setTotalIssuance] = useState('0');
+  const [isRemoving, setIsRemoving] = useState(false);
 
   const initAppchain = async (appchain) => {
     
@@ -273,6 +282,29 @@ function Appchain(): React.ReactElement {
     message.success('RPC Call Success!');
   }, []);
 
+  const onRemoveAppchain = (id) => {
+    setIsRemoving(true);
+    window.contract
+      .remove_appchain(
+        {
+          appchain_id: id,
+        },
+        BOATLOAD_OF_GAS,
+        0
+      )
+      .then(() => {
+        navigate('/appchains');
+      })
+      .catch((err) => {
+        setIsRemoving(false);
+        message.error(err.toString());
+      });
+  }
+
+  const onTabChange = (tabId) => {
+    navigate(`/appchains/${id}/${tabId}`)
+  }
+
   return (
     <div className='container' style={{ padding: '20px 0' }}>
       <div className={styles.title}>
@@ -283,12 +315,12 @@ function Appchain(): React.ReactElement {
               <RightOutlined />
             </span>
             <span className={classnames(styles.name, styles.skeleton)}>
-              {appchain?.appchain_name}
+              {appchain?.id}
             </span>
           </div>
           <div className={styles.appchainName}>
             <span className={classnames(styles.text, styles.skeleton)}>
-              {appchain?.appchain_name}
+              {appchain?.id}
             </span>
             <span
               className={classnames(styles.status, styles[appchain?.status])}
@@ -303,48 +335,81 @@ function Appchain(): React.ReactElement {
           </div>
         </div>
         <div className={styles.right}>
-          <div className={styles.buttons}>
-            {appchain && appchain.founder_id == window.accountId && (
-              <Link to={`/update/${id}`}>
-                <Button type='primary' icon={<EditOutlined />}>
-                  Update
+          {
+            window.accountId == window.contractName ?
+            <div className={styles.buttons}>
+              {
+                appchain?.status == 'InProgress' ?
+                <Button type='primary' icon={<CheckOutlined />} onClick={() => setApproveModalVisible(true)}>
+                  Approve
+                </Button> :
+                appchain?.status == 'Frozen' ?
+                <Button type='primary' onClick={() => setActivateModalVisible(true)}>
+                  Activate
+                </Button> : null
+              }
+              {
+                appchain &&
+                <Popconfirm
+                  title="Are you sure to remove this appchain?"
+                  onConfirm={() => onRemoveAppchain(appchain?.id)}
+                >
+                  <Button type="ghost" danger disabled={isRemoving} loading={isRemoving} 
+                    style={{ background: 'transparent' }}>
+                    Remove
+                  </Button>
+                </Popconfirm>
+              }
+            </div> :
+            <div className={styles.buttons}>
+              {
+                appchain?.founder_id == window.accountId ?
+                appchain?.status != 'InProgress' &&
+                (
+                  <Link to={`/update/${id}`}>
+                    <Button type='primary' icon={<EditOutlined />}>
+                      Update
+                    </Button>
+                  </Link>
+                ) :
+                <>
+                {
+                  (
+                    appchain?.status == 'Frozen' ||
+                    appchain?.status == 'Active' 
+                  ) &&
+                  <Button onClick={() => setStakeModalVisible(true)}
+                  >
+                    Stake
+                  </Button>
+                }
+                <Button 
+                  icon={<CloudServerOutlined />} 
+                  disabled={!appchainInitialized}
+                  onClick={() => setDeployModalVisible(true)}
+                >
+                  Deploy Validator
                 </Button>
-              </Link>
-            )}
-            <Button 
-              icon={<CloudServerOutlined />} 
-              disabled={!appchainInitialized}
-              onClick={() => setDeployModalVisible(true)}
-            >
-              Deploy Validator
-            </Button>
-            <Button
-              type='primary'
-              style={{ marginLeft: '15px' }}
-              icon={<CodeOutlined />}
-              disabled={!appchainInitialized}
-              onClick={() => setRPCModalVisible(true)}
-            >
-              RPC Call
-            </Button>
-          </div>
+                <Button
+                  type='primary'
+                  style={{ marginLeft: '15px' }}
+                  icon={<CodeOutlined />}
+                  disabled={!appchainInitialized}
+                  onClick={() => setRPCModalVisible(true)}
+                >
+                  RPC Call
+                </Button>
+                </>
+              } 
+                
+            </div>
+          }
+          
         </div>
       </div>
 
       <div className={styles.detail}>
         <div className={styles.left}>
-          <div className={styles.baseInfo}>
-            <span
-              className={classnames(styles.tag, styles.id, styles.skeleton)}
-            >
-              {appchain && 'ID: ' + appchain.id}
-            </span>
-            {appchain && (
-              <span className={classnames(styles.tag, styles.block)}>
-                at block #{appchain.block_height}
-              </span>
-            )}
-          </div>
           <div className={styles.baseInfo}>
             {appchain && (
               <a
@@ -355,6 +420,14 @@ function Appchain(): React.ReactElement {
                 <UserOutlined /> {appchain.founder_id}
               </a>
             )}
+            {appchain && (
+              <span className={classnames(styles.tag, styles.block)}>
+                at block #{appchain.block_height}
+              </span>
+            )}
+          </div>
+          <div className={styles.baseInfo}>
+            
             {appchain?.website_url && (
               <a
                 className={classnames(styles.tag, styles.link)}
@@ -364,7 +437,7 @@ function Appchain(): React.ReactElement {
                 <LinkOutlined /> Website
               </a>
             )}
-            {appchain?.github_address && (
+            {appchain && (
               <a
                 className={classnames(styles.tag, styles.link)}
                 href={appchain.github_address}
@@ -372,6 +445,22 @@ function Appchain(): React.ReactElement {
               >
                 <GithubOutlined /> Github
               </a>
+            )}
+            {appchain && (
+              <a
+                className={classnames(styles.tag, styles.link)}
+                href={appchain.github_release}
+                target='_blank'
+              >
+                <GithubOutlined /> Release
+              </a>
+            )}
+            {appchain && (
+              <span
+                className={classnames(styles.tag, styles.block)}
+              >
+                commit {appchain.commit_id?.substr(0,7)}
+              </span>
             )}
           </div>
         </div>
@@ -390,29 +479,44 @@ function Appchain(): React.ReactElement {
             <Descriptions.Item label="Chain Spec">
               {appchain ? (
                 appchain.chain_spec_hash ? (
-                  <Popover content={appchain.chain_spec_url} placement="top">
-                    <CopyToClipboard
-                      text={`${appchain.chain_spec_url}`}
-                      onCopy={() => message.info("Copied!")}
-                    >
-                      <div style={{ cursor: "pointer", display: "flex" }}>
-                        <span
-                          style={{
-                            flex: "1",
-                            whiteSpace: "nowrap",
-                            textOverflow: "ellipsis",
-                            overflow: "hidden",
-                            maxWidth: "180px",
-                          }}
+                  
+                  <Row>
+                    <Col span={24}>
+                      <Popover content={appchain.chain_spec_url} placement="top">
+                        <CopyToClipboard
+                          text={`${appchain.chain_spec_url}`}
+                          onCopy={() => message.info("Copied!")}
                         >
-                          {appchain.chain_spec_url}
-                        </span>
-                        <span style={{ marginLeft: "5px", color: "#aaa" }}>
-                          <CopyOutlined />
-                        </span>
-                      </div>
-                    </CopyToClipboard>
-                  </Popover>
+                          <div style={{ cursor: "pointer", display: "flex" }}>
+                            <span className={styles.descriptionItemRow}>
+                              Url: {appchain.chain_spec_url}
+                            </span>
+                            <span style={{ marginLeft: "5px", color: "#aaa" }}>
+                              <CopyOutlined />
+                            </span>
+                          </div>
+                        </CopyToClipboard>
+                      </Popover>
+                    </Col>
+                    <Col span={24} style={{ marginTop: 5 }}>
+                      <Popover content={appchain.chain_spec_hash} placement="top">
+                        <CopyToClipboard
+                          text={`${appchain.chain_spec_hash}`}
+                          onCopy={() => message.info("Copied!")}
+                        >
+                          <div style={{ cursor: "pointer", display: "flex" }}>
+                            <span className={styles.descriptionItemRow}>
+                              Hash: {appchain.chain_spec_hash}
+                            </span>
+                            <span style={{ marginLeft: "5px", color: "#aaa" }}>
+                              <CopyOutlined />
+                            </span>
+                          </div>
+                        </CopyToClipboard>
+                      </Popover>
+                    </Col>
+                  </Row>
+     
                 ) : (
                   <span>Not Provided</span>
                 )
@@ -423,32 +527,45 @@ function Appchain(): React.ReactElement {
                 />
               )}
             </Descriptions.Item>
-            <Descriptions.Item label="Chain Spec Hash">
+            <Descriptions.Item label="Chain Spec Raw">
               {appchain ? (
-                appchain.chain_spec_hash ? (
-                  <Popover content={appchain.chain_spec_hash} placement="top">
-                    <CopyToClipboard
-                      text={`${appchain.chain_spec_hash}`}
-                      onCopy={() => message.info("Copied!")}
-                    >
-                      <div style={{ cursor: "pointer", display: "flex" }}>
-                        <span
-                          style={{
-                            flex: "1",
-                            whiteSpace: "nowrap",
-                            textOverflow: "ellipsis",
-                            overflow: "hidden",
-                            maxWidth: "180px",
-                          }}
+                appchain.chain_spec_raw_url ? (
+                  <Row>
+                    <Col span={24}>
+                      <Popover content={appchain.chain_spec_raw_url} placement="top">
+                        <CopyToClipboard
+                          text={`${appchain.chain_spec_raw_url}`}
+                          onCopy={() => message.info("Copied!")}
                         >
-                          {appchain.chain_spec_hash}
-                        </span>
-                        <span style={{ marginLeft: "5px", color: "#aaa" }}>
-                          <CopyOutlined />
-                        </span>
-                      </div>
-                    </CopyToClipboard>
-                  </Popover>
+                          <div style={{ cursor: "pointer", display: "flex" }}>
+                            <span className={styles.descriptionItemRow}>
+                              Url: {appchain.chain_spec_raw_url}
+                            </span>
+                            <span style={{ marginLeft: "5px", color: "#aaa" }}>
+                              <CopyOutlined />
+                            </span>
+                          </div>
+                        </CopyToClipboard>
+                      </Popover>
+                    </Col>
+                    <Col span={24} style={{ marginTop: 5 }}>
+                      <Popover content={appchain.chain_spec_raw_hash} placement="top">
+                        <CopyToClipboard
+                          text={`${appchain.chain_spec_raw_hash}`}
+                          onCopy={() => message.info("Copied!")}
+                        >
+                          <div style={{ cursor: "pointer", display: "flex" }}>
+                            <span className={styles.descriptionItemRow}>
+                              Hash: {appchain.chain_spec_raw_hash}
+                            </span>
+                            <span style={{ marginLeft: "5px", color: "#aaa" }}>
+                              <CopyOutlined />
+                            </span>
+                          </div>
+                        </CopyToClipboard>
+                      </Popover>
+                    </Col>
+                  </Row>
                 ) : (
                   <span>Not Provided</span>
                 )
@@ -543,7 +660,7 @@ function Appchain(): React.ReactElement {
         
       </div>
       <div className={styles.explorer} style={{ marginTop: '30px' }}>
-        <Tabs defaultActiveKey="blocks">
+        <Tabs defaultActiveKey={tab || 'blocks'} onChange={onTabChange}>
           <Tabs.TabPane tab="Blocks" key="blocks">
 
             {
@@ -562,7 +679,7 @@ function Appchain(): React.ReactElement {
               columns={columns}
               rowKey={(record) => record.account_id}
               loading={isLoading || isLoadingValidators}
-              dataSource={validatorSet?.validators}
+              dataSource={appchain?.validators}
               pagination={false}
             />
           </Tabs.TabPane>
@@ -571,6 +688,9 @@ function Appchain(): React.ReactElement {
       <RPCModal api={api} visible={rpcModalVisible} onOk={onRPCCallOk} 
         onCancel={() => setRPCModalVisible(false)} />
       <DeployModal appchain={appchain} visible={deployModalVisible} onCancel={() => setDeployModalVisible(false)} />
+      <ApproveModal visible={approveModalVisible} appchainId={appchain?.id} onCancel={() => setApproveModalVisible(false)} />
+      <ActivateModal visible={activateModalVisible} appchainId={appchain?.id} onCancel={() => setActivateModalVisible(false)} />
+      <StakeModal visible={stakeModalVisible} appchainId={appchain?.id} onCancel={() => setStakeModalVisible(false)} />
     </div>
   );
 }

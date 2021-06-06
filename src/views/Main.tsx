@@ -64,12 +64,7 @@ function Main(): React.ReactElement {
                 {window.tokenContractName}
               </a>
             </p>
-            <p>
-              <span>Chainspec snippet: </span>
-              <a target="_blank" href="https://storage.googleapis.com/dl-testnet/chainspec-snippet.json">
-                Download <DownloadOutlined />
-              </a>
-            </p>
+            
           </div>
         </div>
       </Footer>

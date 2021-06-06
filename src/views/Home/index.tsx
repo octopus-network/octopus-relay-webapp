@@ -29,15 +29,10 @@ function Home(): React.ReactElement {
       .get_num_appchains()
       .then((num) => {
         setNumberAppchains(num);
-        let promises = [];
-        for (let i = 0; i < num; i++) {
-          promises.push(
-            window.contract.get_appchain({
-              appchain_id: i,
-            })
-          );
-        }
-        return Promise.all(promises);
+        return window.contract.get_appchains({
+          from_index: num > 5 ? num -5 : 0,
+          limit: 5,
+        })
       })
       .then((oAppchains) => {
         setIsLoadingList(false);
@@ -139,7 +134,7 @@ function Home(): React.ReactElement {
       </div>
       <div style={{ marginTop: "50px" }} className="container">
         <div className={styles.sectionTitle}>
-          <span>Hot Appchains</span>
+          <span>New Appchains</span>
         </div>
         <div className={styles.appchainList}>
           <Row className={styles.header}>
@@ -157,7 +152,6 @@ function Home(): React.ReactElement {
                   return (
                     <Row className={styles.skeleton} key={idx}>
                       <Col span={11}>
-                        <i className={styles.circle} />
                         <span className={styles.name} />
                       </Col>
                       <Col span={13} className={styles.rest} />
@@ -176,11 +170,11 @@ function Home(): React.ReactElement {
                   <Row
                     className={styles.appchain}
                     key={idx}
-                    onClick={(e) => navigate(`/appchain/${id}`)}
+                    onClick={(e) => navigate(`/appchains/${id}`)}
                   >
                     <Col span={11}>
-                      <i className={styles.id}>{idx + 1}</i>
-                      <span className={styles.name}>{appchain_name}</span>
+                      {/* <i className={styles.id}>{idx + 1}</i> */}
+                      <span className={styles.name}>{id}</span>
                     </Col>
                     <Col span={5}>{validators.length}</Col>
                     <Col span={4}>{totalStaked} OCT</Col>

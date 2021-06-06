@@ -2,8 +2,9 @@ import React, { useState, useEffect, useCallback } from 'react';
 
 import { Input, Tooltip, Button, Card, Form, Alert, Row, Col, Spin, message } from 'antd';
 
-import { LeftOutlined, PlusCircleFilled, InfoCircleFilled, QuestionCircleOutlined } from '@ant-design/icons';
-import { Link } from 'react-router-dom';
+
+import { InfoCircleFilled, QuestionCircleOutlined } from '@ant-design/icons';
+import { Link, useNavigate } from 'react-router-dom';
 
 import Big from 'big.js';
 
@@ -13,10 +14,11 @@ import styles from './styles.less';
 import {toDecimals, fromDecimals} from '../../utils';
 
 function Register(): React.ReactElement {
+  
   const urlParams = new URLSearchParams(window.location.search);
   const transactionHashes = urlParams.get('transactionHashes');
   if (transactionHashes) {
-    window.location.replace('/');
+    window.location.href = '/#/appchains';
   }
 
   const miniumBondTokenAmount = 100;
@@ -29,14 +31,14 @@ function Register(): React.ReactElement {
     if (accountBalance < miniumBondTokenAmount) {
       return message.error('Insufficient balance');
     }
-    const { appchain_name, github_address, website_url } = values;
+    const { appchain_id, github_address, website_url, github_release, commit_id } = values;
     setIsSubmiting(true);
     
     window.tokenContract.ft_transfer_call(
       {
         receiver_id: window.contractName,
         amount: toDecimals(miniumBondTokenAmount),
-        msg: `register_appchain,${appchain_name},${website_url || ''},${github_address || ''}`
+        msg: `register_appchain,${appchain_id},${website_url || ''},${github_address},${github_release},${commit_id}`
       },
       BOATLOAD_OF_GAS,
       1,
@@ -62,7 +64,6 @@ function Register(): React.ReactElement {
   return (
     <div className="container" style={{ padding: '20px 0' }}>
       <div className={styles.title}>
-      
         <span>Register Appchain</span>
       </div>
       {/* <Link to='/'>
@@ -74,21 +75,43 @@ function Register(): React.ReactElement {
       <Card bordered={false} style={{ marginTop: '20px' }}>
         <div className={styles.alert}>
           <InfoCircleFilled />
-          <span>Please fill the information below, with </span>
-          <span style={{ color: '#f00' }}>* </span> 
-          <span>is required.</span>
+          <span>Please fill the information below </span>
         </div>
         <Form labelCol={{ span: 4 }} wrapperCol={{ span: 20 }} className={styles.form} colon={false} onFinish={onFinish}>
-          <Form.Item label='Appchain name' name='appchain_name' rules={[
-            { required: true, message: 'please input your appchain name' }
+          <Form.Item required label='Appchain name' name='appchain_id' rules={[
+            { 
+              validator: (_, value) => {
+                if (!value) {
+                  return Promise.reject(new Error("please input your appchain name"));
+                }
+                return window.contract.get_appchain({ appchain_id: value }).then(appchain => {
+                  if (appchain !== null) {
+                    return Promise.reject(new Error("appchain name have been used"));
+                  }
+                  return Promise.resolve();
+                });
+              },
+            }
           ]}>
-            <Input placeholder='Your appchain name' size='large' />
+            <Input placeholder='appchain name' size='large' />
           </Form.Item>
           <Form.Item label='Website' name='website_url'>
-            <Input placeholder='Your website url' size='large' />
+            <Input placeholder='website url' size='large' />
           </Form.Item>
-          <Form.Item label='Github' name='github_address'>
-            <Input placeholder='Your github address' size='large' />
+          <Form.Item label='Github' name='github_address' rules={[
+            { required: true, message: 'please input your github address' }
+          ]}>
+            <Input placeholder='github address' size='large' />
+          </Form.Item>
+          <Form.Item label='Github release' name='github_release' rules={[
+            { required: true, message: 'please input your github release' }
+          ]}>
+            <Input placeholder='github release' size='large' />
+          </Form.Item>
+          <Form.Item label='Commit id' name='commit_id' rules={[
+            { required: true, message: 'please input the commit id' }
+          ]}>
+            <Input placeholder='commit id' size='large' />
           </Form.Item>
           <Form.Item label={
             <div>

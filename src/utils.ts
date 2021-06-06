@@ -38,14 +38,17 @@ export async function initContract() {
         "get_appchains",
         "get_total_staked_balance",
         "get_validator_set",
+        "get_validators",
         "get_minium_staking_amount",
       ],
       // Change methods can modify the state. But you don't receive the returned value when called.
       changeMethods: [
         "update_appchain",
-        "unstaking",
+        "unstake",
         "activate_appchain",
         "freeze_appchain",
+        "remove_appchain",
+        "list_appchain"
       ],
     }
   );

@@ -140,8 +140,8 @@ function Header(): React.ReactElement {
               <Menu.Item key="home">
                 <Link to="/home">Home</Link>
               </Menu.Item>
-              <Menu.Item key="appchain">
-                <Link to="/appchain">Appchains</Link>
+              <Menu.Item key="appchains">
+                <Link to="/appchains">Appchains</Link>
               </Menu.Item>
               <Menu.Item key="bridge">
                 <a href="https://birdge.oct.network" target="_blank">Bridge</a>
