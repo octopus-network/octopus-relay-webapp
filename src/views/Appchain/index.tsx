@@ -16,7 +16,7 @@ import {
   Tabs,
   Popconfirm,
   Empty,
-  Popover,
+  Tooltip,
   notification
 } from "antd";
 
@@ -49,6 +49,7 @@ import DeployModal from './DeployModal';
 import ApproveModal from "./ApproveModal";
 import ActivateModal from "./ActivateModal";
 import StakeModal from "./StakeModal";
+import Hash from '../../components/Hash';
 
 const BOATLOAD_OF_GAS = Big(3)
   .times(10 ** 14)
@@ -476,11 +477,11 @@ function Appchain(): React.ReactElement {
             </Descriptions.Item>
             <Descriptions.Item label="Chain Spec">
               {appchain ? (
-                appchain.chain_spec_hash ? (
+                appchain.chain_spec_url ? (
                   
                   <Row>
                     <Col span={24}>
-                      <Popover content={appchain.chain_spec_url} placement="top">
+                      <Tooltip title={appchain.chain_spec_url}>
                         <CopyToClipboard
                           text={`${appchain.chain_spec_url}`}
                           onCopy={() => message.info("Copied!")}
@@ -494,24 +495,10 @@ function Appchain(): React.ReactElement {
                             </span>
                           </div>
                         </CopyToClipboard>
-                      </Popover>
+                      </Tooltip>
                     </Col>
                     <Col span={24} style={{ marginTop: 5 }}>
-                      <Popover content={appchain.chain_spec_hash} placement="top">
-                        <CopyToClipboard
-                          text={`${appchain.chain_spec_hash}`}
-                          onCopy={() => message.info("Copied!")}
-                        >
-                          <div style={{ cursor: "pointer", display: "flex" }}>
-                            <span className={styles.descriptionItemRow}>
-                              Hash: {appchain.chain_spec_hash}
-                            </span>
-                            <span style={{ marginLeft: "5px", color: "#aaa" }}>
-                              <CopyOutlined />
-                            </span>
-                          </div>
-                        </CopyToClipboard>
-                      </Popover>
+                      <Hash value={appchain?.chain_spec_hash} noCopy0x />
                     </Col>
                   </Row>
      
@@ -530,7 +517,7 @@ function Appchain(): React.ReactElement {
                 appchain.chain_spec_raw_url ? (
                   <Row>
                     <Col span={24}>
-                      <Popover content={appchain.chain_spec_raw_url} placement="top">
+                      <Tooltip title={appchain.chain_spec_raw_url}>
                         <CopyToClipboard
                           text={`${appchain.chain_spec_raw_url}`}
                           onCopy={() => message.info("Copied!")}
@@ -544,24 +531,10 @@ function Appchain(): React.ReactElement {
                             </span>
                           </div>
                         </CopyToClipboard>
-                      </Popover>
+                      </Tooltip>
                     </Col>
                     <Col span={24} style={{ marginTop: 5 }}>
-                      <Popover content={appchain.chain_spec_raw_hash} placement="top">
-                        <CopyToClipboard
-                          text={`${appchain.chain_spec_raw_hash}`}
-                          onCopy={() => message.info("Copied!")}
-                        >
-                          <div style={{ cursor: "pointer", display: "flex" }}>
-                            <span className={styles.descriptionItemRow}>
-                              Hash: {appchain.chain_spec_raw_hash}
-                            </span>
-                            <span style={{ marginLeft: "5px", color: "#aaa" }}>
-                              <CopyOutlined />
-                            </span>
-                          </div>
-                        </CopyToClipboard>
-                      </Popover>
+                      <Hash value={appchain?.chain_spec_raw_hash} noCopy0x />
                     </Col>
                   </Row>
                 ) : (
@@ -576,7 +549,7 @@ function Appchain(): React.ReactElement {
             </Descriptions.Item>
             {appchain && appchain.boot_nodes && (
               <Descriptions.Item label="Boot Nodes">
-                <Popover content={appchain.boot_nodes} placement="bottom">
+                <Tooltip title={appchain.boot_nodes}>
                   <CopyToClipboard
                     text={`${appchain.boot_nodes}`}
                     onCopy={() => message.info("Copied!")}
@@ -598,12 +571,12 @@ function Appchain(): React.ReactElement {
                       </span>
                     </div>
                   </CopyToClipboard>
-                </Popover>
+                </Tooltip>
               </Descriptions.Item>
             )}
             {appchain && appchain.boot_nodes && (
               <Descriptions.Item label="Rpc Endpoint">
-                <Popover content={appchain.rpc_endpoint} placement="bottom">
+                <Tooltip title={appchain.rpc_endpoint}>
                   <CopyToClipboard
                     text={`${appchain.rpc_endpoint}`}
                     onCopy={() => message.info("Copied!")}
@@ -625,7 +598,7 @@ function Appchain(): React.ReactElement {
                       </span>
                     </div>
                   </CopyToClipboard>
-                </Popover>
+                </Tooltip>
               </Descriptions.Item>
             )}
           </Descriptions>

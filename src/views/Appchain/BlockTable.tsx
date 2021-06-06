@@ -5,6 +5,7 @@ import { ClockCircleOutlined } from '@ant-design/icons';
 
 import { Link, useNavigate } from 'react-router-dom';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
+import Hash from '../../components/Hash';
 
 function getHeaderByBlockNumber(api, num) {
   
@@ -61,11 +62,7 @@ function BlockTable({ api, bestNumber, appchainId }): React.ReactElement {
         dataIndex: 'hash',
         key: 'hash',
         render: (text) => {
-          return (
-            <span>
-              {text.substr(0, 18)}...{text.slice(-18)}
-            </span>
-          );
+          return <Hash value={text} />
         }
       },
       {

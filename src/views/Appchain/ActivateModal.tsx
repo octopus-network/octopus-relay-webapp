@@ -14,7 +14,7 @@ function ActivateModal({ visible, onCancel, appchainId }): React.ReactElement {
 
     window.contract.activate_appchain(
       {
-        appchain_id: appchainId * 1,
+        appchain_id: appchainId,
         boot_nodes,
         rpc_endpoint,
       },
