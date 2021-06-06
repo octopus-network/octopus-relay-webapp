@@ -12,7 +12,7 @@ import {
   message,
   Table,
   Button,
-  Breadcrumb,
+  Result,
   Tabs,
   Popconfirm,
   Empty,
@@ -29,7 +29,7 @@ import {
   EditOutlined,
   CodeOutlined,
   UserOutlined,
-  UpOutlined,
+  CommentOutlined,
   CloudServerOutlined,
   LinkOutlined,
   LoadingOutlined
@@ -271,9 +271,7 @@ function Appchain(): React.ReactElement {
     return () => {
       unsubNewHeads();
       unsubNewFinalizedHeads();
-     
     }
-   
   }
 
   const onRPCCallOk = useCallback((res) => {
@@ -654,12 +652,32 @@ function Appchain(): React.ReactElement {
             <em className={styles.desc}>Total Issuance</em>
           </div>
           </> :
+          window.accountId == appchain?.founder_id && appchain?.status == 'InProgress' ?
+          <div style={{ flex: 1, alignItems: 'center', display: 'flex', justifyContent: 'center' }}>
+            <Result
+              title="Your appchain registration is in process"
+              subTitle="Copy this link and urge our team in discord will speed up the process:)"
+              extra={[
+                <CopyToClipboard
+                  text={`#registration Hello Octopus team, just finished my appchain registration: ${window.location.href}, please check. Thanks~`}
+                  onCopy={() => message.info("Copied!")}
+                >
+                  <Button key="copy" icon={<CopyOutlined />}>Copy link</Button>
+                </CopyToClipboard>,
+                <Button key="discord" type="ghost" icon={<CommentOutlined />} href="https://discord.com/invite/6GTJBkZA9Q" target="_blank"
+                  style={{ borderColor: '#53ab90', color: '#53ab90' }}>Go to discord</Button>
+              ]}
+            />
+          </div> :
           <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} style={{ flex: 1, margin: '0', height: '62px' }}
             description='Appchain is not ready' />
         }
         
       </div>
-      <div className={styles.explorer} style={{ marginTop: '30px' }}>
+      <div className={styles.explorer} style={{ 
+        marginTop: '30px', 
+        display: window.accountId == appchain?.founder_id && appchain?.status == 'InProgress' ? 'none' : 'block'
+      }}>
         <Tabs defaultActiveKey={tab || 'blocks'} onChange={onTabChange}>
           <Tabs.TabPane tab="Blocks" key="blocks">
 
