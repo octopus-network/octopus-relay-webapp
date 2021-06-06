@@ -308,7 +308,7 @@ function Appchain(): React.ReactElement {
       <div className={styles.title}>
         <div className={styles.left}>
           <div className={styles.breadcrumb}>
-            <Link to='/appchain'>Appchains</Link>
+            <Link to='/appchains'>Appchains</Link>
             <span className={styles.arrow}>
               <RightOutlined />
             </span>
