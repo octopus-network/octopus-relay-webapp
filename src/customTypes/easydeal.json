@@ -1,0 +1,12 @@
+{
+  "Validator": {
+    "id": "AccountId",
+    "weight": "u64"
+  },
+  "ValidatorSet": {
+    "sequence_number": "u32",
+    "validators": "Vec<Validator>"
+  },
+  "AssetIdOf": "AssetId",
+  "AssetBalanceOf": "u64"
+}
