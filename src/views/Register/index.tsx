@@ -14,7 +14,7 @@ import styles from './styles.less';
 import {toDecimals, fromDecimals} from '../../utils';
 
 function Register(): React.ReactElement {
-  
+  const navigate = useNavigate();
   const urlParams = new URLSearchParams(window.location.search);
   const transactionHashes = urlParams.get('transactionHashes');
   if (transactionHashes) {
@@ -43,7 +43,7 @@ function Register(): React.ReactElement {
       BOATLOAD_OF_GAS,
       1,
     ).then(() => {
-      window.location.reload();
+      navigate(-1);
     }).catch((err) => {
       setIsSubmiting(false);
       message.error(err.toString());

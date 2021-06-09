@@ -29,7 +29,7 @@ import {
   EditOutlined,
   CodeOutlined,
   UserOutlined,
-  CommentOutlined,
+  MailOutlined,
   CloudServerOutlined,
   LinkOutlined,
   LoadingOutlined
@@ -211,6 +211,7 @@ function Appchain(): React.ReactElement {
   const [bestBlock, setBestBlock] = useState(0);
   const [totalIssuance, setTotalIssuance] = useState('0');
   const [isRemoving, setIsRemoving] = useState(false);
+  const [isApproving, setIsApproving] = useState(false);
 
   const initAppchain = async (appchain) => {
     
@@ -304,6 +305,24 @@ function Appchain(): React.ReactElement {
     navigate(`/appchains/${id}/${tabId}`)
   }
 
+  const onApproveAppchain = () => {
+    setIsApproving(true);
+    window.contract.list_appchain(
+      {
+        appchain_id: id
+      },
+      BOATLOAD_OF_GAS,
+      0
+    )
+    .then(() => {
+      navigate(0);
+    })
+    .catch((err) => {
+      setIsApproving(false);
+      message.error(err.toString());
+    });
+  }
+
   return (
     <div className='container' style={{ padding: '20px 0' }}>
       <div className={styles.title}>
@@ -338,9 +357,9 @@ function Appchain(): React.ReactElement {
             window.accountId == window.contractName ?
             <div className={styles.buttons}>
               {
-                appchain?.status == 'InProgress' ?
-                <Button type='primary' icon={<CheckOutlined />} onClick={() => setApproveModalVisible(true)}>
-                  Approve
+                appchain?.status == 'Auditing' ?
+                <Button type='primary' loading={isApproving}  icon={<CheckOutlined />} onClick={onApproveAppchain}>
+                  Pass
                 </Button> :
                 appchain?.status == 'Frozen' ?
                 <Button type='primary' onClick={() => setActivateModalVisible(true)}>
@@ -348,14 +367,14 @@ function Appchain(): React.ReactElement {
                 </Button> : null
               }
               {
-                appchain &&
+                appchain?.status == 'Auditing' &&
                 <Popconfirm
-                  title="Are you sure to remove this appchain?"
+                  title="Are you sure to reject this appchain?"
                   onConfirm={() => onRemoveAppchain(appchain?.id)}
                 >
                   <Button type="ghost" danger disabled={isRemoving} loading={isRemoving} 
                     style={{ background: 'transparent' }}>
-                    Remove
+                    Reject
                   </Button>
                 </Popconfirm>
               }
@@ -363,7 +382,7 @@ function Appchain(): React.ReactElement {
             <div className={styles.buttons}>
               {
                 appchain?.founder_id == window.accountId ?
-                appchain?.status != 'InProgress' &&
+                appchain?.status != 'Auditing' &&
                 (
                   <Link to={`/update/${id}`}>
                     <Button type='primary' icon={<EditOutlined />}>
@@ -465,7 +484,7 @@ function Appchain(): React.ReactElement {
         </div>
         <div className={styles.right}>
           <Descriptions column={3} layout="vertical" colon={false}>
-            <Descriptions.Item label="Bonded">
+            {/* <Descriptions.Item label="Bonded">
               {appchain ? (
                 <span> {appchain.bond_tokens} OCT </span>
               ) : (
@@ -474,7 +493,7 @@ function Appchain(): React.ReactElement {
                   style={{ width: "200px", height: "24px" }}
                 />
               )}
-            </Descriptions.Item>
+            </Descriptions.Item> */}
             <Descriptions.Item label="Chain Spec">
               {appchain ? (
                 appchain.chain_spec_url ? (
@@ -625,20 +644,25 @@ function Appchain(): React.ReactElement {
             <em className={styles.desc}>Total Issuance</em>
           </div>
           </> :
-          window.accountId == appchain?.founder_id && appchain?.status == 'InProgress' ?
+          window.accountId == appchain?.founder_id && appchain?.status == 'Auditing' ?
           <div style={{ flex: 1, alignItems: 'center', display: 'flex', justifyContent: 'center' }}>
             <Result
               title="Your appchain registration is in process"
-              subTitle="Copy this link and urge our team in discord will speed up the process:)"
+              subTitle="Copy this link and send mail to our team will speed up the process:)"
               extra={[
                 <CopyToClipboard
-                  text={`#registration Hello Octopus team, just finished my appchain registration: ${window.location.href}, please check. Thanks~`}
-                  onCopy={() => message.info("Copied!")}
+                  text={`Hello Octopus team, just finished my appchain registration: ${window.location.href}, please check. Thanks~`}
+                  onCopy={() => message.info("Link copied!")}
                 >
                   <Button key="copy" icon={<CopyOutlined />}>Copy link</Button>
                 </CopyToClipboard>,
-                <Button key="discord" type="ghost" icon={<CommentOutlined />} href="https://discord.com/invite/6GTJBkZA9Q" target="_blank"
-                  style={{ borderColor: '#53ab90', color: '#53ab90' }}>Go to discord</Button>
+                <CopyToClipboard
+                  text={`appchain@oct.network`}
+                  onCopy={() => message.info("Email copied!")}
+                >
+                  <Button key="discord" type="ghost" icon={<MailOutlined />}
+                    style={{ borderColor: '#53ab90', color: '#53ab90' }}>Copy email</Button>
+                </CopyToClipboard>
               ]}
             />
           </div> :
@@ -649,7 +673,7 @@ function Appchain(): React.ReactElement {
       </div>
       <div className={styles.explorer} style={{ 
         marginTop: '30px', 
-        display: window.accountId == appchain?.founder_id && appchain?.status == 'InProgress' ? 'none' : 'block'
+        display: window.accountId == appchain?.founder_id && appchain?.status == 'Auditing' ? 'none' : 'block'
       }}>
         <Tabs defaultActiveKey={tab || 'blocks'} onChange={onTabChange}>
           <Tabs.TabPane tab="Blocks" key="blocks">
@@ -679,7 +703,7 @@ function Appchain(): React.ReactElement {
       <RPCModal api={api} visible={rpcModalVisible} onOk={onRPCCallOk} 
         onCancel={() => setRPCModalVisible(false)} />
       <DeployModal appchain={appchain} visible={deployModalVisible} onCancel={() => setDeployModalVisible(false)} />
-      <ApproveModal visible={approveModalVisible} appchainId={appchain?.id} onCancel={() => setApproveModalVisible(false)} />
+      {/* <ApproveModal visible={approveModalVisible} appchainId={appchain?.id} onCancel={() => setApproveModalVisible(false)} /> */}
       <ActivateModal visible={activateModalVisible} appchainId={appchain?.id} onCancel={() => setActivateModalVisible(false)} />
       <StakeModal visible={stakeModalVisible} appchainId={appchain?.id} onCancel={() => setStakeModalVisible(false)} />
     </div>

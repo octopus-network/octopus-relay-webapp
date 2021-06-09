@@ -9,14 +9,21 @@ function ActivateModal({ visible, onCancel, appchainId }): React.ReactElement {
   const [isSubmiting, setIsSubmiting] = useState<boolean>(false);
 
   const onFinish = useCallback((values) => {
-    const { boot_nodes, rpc_endpoint } = values;
-    setIsSubmiting(true);
+    const { 
+      boot_nodes, rpc_endpoint, chain_spec_url, 
+      chain_spec_hash, chain_spec_raw_url, chain_spec_raw_hash 
+    } = values;
 
+    setIsSubmiting(true);
     window.contract.activate_appchain(
       {
         appchain_id: appchainId,
         boot_nodes,
         rpc_endpoint,
+        chain_spec_url,
+        chain_spec_hash,
+        chain_spec_raw_url,
+        chain_spec_raw_hash
       },
       BOATLOAD_OF_GAS,
       0
@@ -41,6 +48,27 @@ function ActivateModal({ visible, onCancel, appchainId }): React.ReactElement {
           { required: true, message: 'Please input the rpc endpoint' }
         ]}>
           <Input placeholder="please input rpc endpoint" size="large" />
+        </Form.Item>
+        <Form.Item name="chain_spec_url" label="Chain spec" rules={[
+          { required: true, message: 'Please input the chain spec url' }
+        ]}>
+          <Input placeholder="please input the chain spec url" size="large" />
+          
+        </Form.Item>
+        <Form.Item name="chain_spec_hash" label=" " rules={[
+          { required: true, message: 'Please input the chain spec hash' }
+        ]}>
+          <Input placeholder="chain spec hash" size="large" />
+        </Form.Item>
+        <Form.Item name="chain_spec_raw_url" label="Raw chain spec" rules={[
+          { required: true, message: 'Please input the raw chain spec url' }
+        ]}>
+          <Input placeholder="please input the chain spec url" size="large" />
+        </Form.Item>
+        <Form.Item name="chain_spec_raw_hash" label=" " rules={[
+          { required: true, message: 'Please input the raw chain spec hash' }
+        ]}>
+          <Input placeholder="raw chain spec hash" size="large" />
         </Form.Item>
         <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
           <Button type="primary" htmlType="submit" loading={isSubmiting} size="large">Activate</Button>
