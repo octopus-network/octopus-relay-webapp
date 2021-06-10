@@ -144,7 +144,7 @@ function Header(): React.ReactElement {
                 <Link to="/appchains">Appchains</Link>
               </Menu.Item>
               <Menu.Item key="bridge">
-                <a href="https://birdge.oct.network" target="_blank">Bridge</a>
+                <a href="https://octopus-bridge.netlify.app" target="_blank">Bridge</a>
               </Menu.Item>
               <Menu.Item key="docs">
                 <a
