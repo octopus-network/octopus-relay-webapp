@@ -416,7 +416,7 @@ function Appchain(): React.ReactElement {
                 {
                   (
                     appchain?.status == 'Booting' ||
-                    appchain?.status == 'Active' 
+                    appchain?.status == 'Staging' 
                   ) &&
                   <Button onClick={() => setStakeModalVisible(true)}
                   >
