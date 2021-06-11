@@ -48,7 +48,8 @@ export async function initContract() {
         "activate_appchain",
         "freeze_appchain",
         "remove_appchain",
-        "list_appchain"
+        "pass_appchain",
+        "appchain_go_staging"
       ],
     }
   );

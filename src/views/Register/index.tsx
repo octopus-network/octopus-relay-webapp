@@ -31,14 +31,14 @@ function Register(): React.ReactElement {
     if (accountBalance < miniumBondTokenAmount) {
       return message.error('Insufficient balance');
     }
-    const { appchain_id, github_address, website_url, github_release, commit_id } = values;
+    const { appchain_id, github_address, website_url, github_release, commit_id, email } = values;
     setIsSubmiting(true);
     
     window.tokenContract.ft_transfer_call(
       {
         receiver_id: window.contractName,
         amount: toDecimals(miniumBondTokenAmount),
-        msg: `register_appchain,${appchain_id},${website_url || ''},${github_address},${github_release},${commit_id}`
+        msg: `register_appchain,${appchain_id},${website_url || ''},${github_address},${github_release},${commit_id},${email}`
       },
       BOATLOAD_OF_GAS,
       1,
@@ -112,6 +112,11 @@ function Register(): React.ReactElement {
             { required: true, message: 'please input the commit id' }
           ]}>
             <Input placeholder='commit id' size='large' />
+          </Form.Item>
+          <Form.Item label='Email' name='email' rules={[
+            { required: true, message: 'please input your email' }
+          ]}>
+            <Input placeholder='email' size='large' />
           </Form.Item>
           <Form.Item label={
             <div>

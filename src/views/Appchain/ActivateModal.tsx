@@ -55,7 +55,7 @@ function ActivateModal({ visible, onCancel, appchainId }): React.ReactElement {
           <Input placeholder="please input the chain spec url" size="large" />
           
         </Form.Item>
-        <Form.Item name="chain_spec_hash" label=" " rules={[
+        <Form.Item name="chain_spec_hash" label="Chain spec hash" rules={[
           { required: true, message: 'Please input the chain spec hash' }
         ]}>
           <Input placeholder="chain spec hash" size="large" />
@@ -65,7 +65,7 @@ function ActivateModal({ visible, onCancel, appchainId }): React.ReactElement {
         ]}>
           <Input placeholder="please input the chain spec url" size="large" />
         </Form.Item>
-        <Form.Item name="chain_spec_raw_hash" label=" " rules={[
+        <Form.Item name="chain_spec_raw_hash" label="Raw chain spec hash" rules={[
           { required: true, message: 'Please input the raw chain spec hash' }
         ]}>
           <Input placeholder="raw chain spec hash" size="large" />

@@ -138,7 +138,7 @@ function Home(): React.ReactElement {
         </div>
         <div className={styles.appchainList}>
           <Row className={styles.header}>
-            <Col span={11}>Name</Col>
+            <Col span={11}>ID</Col>
             <Col span={5}>Validators</Col>
             <Col span={4}>Staked</Col>
             <Col span={4}>

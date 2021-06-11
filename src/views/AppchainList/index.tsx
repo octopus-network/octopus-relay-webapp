@@ -83,7 +83,7 @@ function AppchainList(): React.ReactElement {
         </Link>
       </div>
       <Row style={{ padding: '15px 25px', color: '#9c9c9c' }}>
-        <Col span={4}>Name</Col>
+        <Col span={4}>ID</Col>
         <Col span={5}>Founder</Col>
         <Col span={5}>Validators</Col>
         <Col span={5}>Staked</Col>

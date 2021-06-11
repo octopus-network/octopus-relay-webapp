@@ -305,9 +305,27 @@ function Appchain(): React.ReactElement {
     navigate(`/appchains/${id}/${tabId}`)
   }
 
-  const onApproveAppchain = () => {
+  const onPassAppchain = () => {
     setIsApproving(true);
-    window.contract.list_appchain(
+    window.contract.pass_appchain(
+      {
+        appchain_id: id
+      },
+      BOATLOAD_OF_GAS,
+      0
+    )
+    .then(() => {
+      navigate(0);
+    })
+    .catch((err) => {
+      setIsApproving(false);
+      message.error(err.toString());
+    });
+  }
+
+  const onGoStaging = () => {
+    setIsApproving(true);
+    window.contract.appchain_go_staging(
       {
         appchain_id: id
       },
@@ -358,10 +376,14 @@ function Appchain(): React.ReactElement {
             <div className={styles.buttons}>
               {
                 appchain?.status == 'Auditing' ?
-                <Button type='primary' loading={isApproving}  icon={<CheckOutlined />} onClick={onApproveAppchain}>
+                <Button type='primary' loading={isApproving} icon={<CheckOutlined />} onClick={onPassAppchain}>
                   Pass
                 </Button> :
-                appchain?.status == 'Frozen' ?
+                appchain?.status == 'InQueue' ?
+                <Button type='primary' loading={isApproving} onClick={onGoStaging}>
+                  Go staging
+                </Button> : 
+                appchain?.status == 'Staging' ?
                 <Button type='primary' onClick={() => setActivateModalVisible(true)}>
                   Activate
                 </Button> : null
@@ -393,7 +415,7 @@ function Appchain(): React.ReactElement {
                 <>
                 {
                   (
-                    appchain?.status == 'Frozen' ||
+                    appchain?.status == 'Booting' ||
                     appchain?.status == 'Active' 
                   ) &&
                   <Button onClick={() => setStakeModalVisible(true)}
@@ -443,8 +465,7 @@ function Appchain(): React.ReactElement {
                 at block #{appchain.block_height}
               </span>
             )}
-          </div>
-          <div className={styles.baseInfo}>
+        
             
             {appchain?.website_url && (
               <a
@@ -482,7 +503,7 @@ function Appchain(): React.ReactElement {
             )}
           </div>
         </div>
-        <div className={styles.right}>
+        <div className={styles.right} style={{ display: appchain?.status != 'Booting' ? 'none' : 'block' }}>
           <Descriptions column={3} layout="vertical" colon={false}>
             {/* <Descriptions.Item label="Bonded">
               {appchain ? (
@@ -656,13 +677,10 @@ function Appchain(): React.ReactElement {
                 >
                   <Button key="copy" icon={<CopyOutlined />}>Copy link</Button>
                 </CopyToClipboard>,
-                <CopyToClipboard
-                  text={`appchain@oct.network`}
-                  onCopy={() => message.info("Email copied!")}
-                >
-                  <Button key="discord" type="ghost" icon={<MailOutlined />}
-                    style={{ borderColor: '#53ab90', color: '#53ab90' }}>Copy email</Button>
-                </CopyToClipboard>
+                
+                <Button key="email" type="ghost" icon={<MailOutlined />} href={`mailto:appchain@oct.network`} target="_blank"
+                  style={{ borderColor: '#53ab90', color: '#53ab90' }}>Send email</Button>
+              
               ]}
             />
           </div> :
