@@ -448,8 +448,8 @@ function Appchain(): React.ReactElement {
         </div>
       </div>
 
-      <div className={styles.detail}>
-        <div className={styles.left}>
+      <Row className={styles.detail}>
+        <Col className={styles.left} span={appchain?.status != 'Booting' ? 24 : 10}>
           <div className={styles.baseInfo}>
             {appchain && (
               <a
@@ -502,8 +502,8 @@ function Appchain(): React.ReactElement {
               </span>
             )}
           </div>
-        </div>
-        <div className={styles.right} style={{ display: appchain?.status != 'Booting' ? 'none' : 'block' }}>
+        </Col>
+        <Col span={14} className={styles.right} style={{ display: appchain?.status != 'Booting' ? 'none' : 'flex' }}>
           <Descriptions column={3} layout="vertical" colon={false}>
             {/* <Descriptions.Item label="Bonded">
               {appchain ? (
@@ -642,8 +642,8 @@ function Appchain(): React.ReactElement {
               </Descriptions.Item>
             )}
           </Descriptions>
-        </div>
-      </div>
+        </Col>
+      </Row>
       <div className={styles.chainStates}>
         {
           isLoading || appchainInitializing ?
