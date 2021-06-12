@@ -144,7 +144,7 @@ function Appchain(): React.ReactElement {
       setAppchain(readableAppchain(appchain));
       setCurrValidatorSetIdx(idx);
       setAppchainValidatorIdx(idx);
-      if (appchain.status == 'Active') {
+      if (appchain.status == 'Booting') {
         initAppchain(appchain);
       }
       // initAppchain('wss://barnacle-dev.rpc.testnet.oct.network:9944');
