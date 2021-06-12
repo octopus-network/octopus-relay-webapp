@@ -144,7 +144,7 @@ function Header(): React.ReactElement {
                 <Link to="/appchains">Appchains</Link>
               </Menu.Item>
               <Menu.Item key="bridge">
-                <a href="https://bridge.oct.network" target="_blank">Bridge</a>
+                <a href={window.contractName == 'octopus-relay.testnet' ? 'https://bridge.testnet.oct.network' : 'https://bridge.dev.oct.network'} target="_blank">Bridge</a>
               </Menu.Item>
               <Menu.Item key="docs">
                 <a

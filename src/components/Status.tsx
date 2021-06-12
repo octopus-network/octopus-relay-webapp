@@ -3,8 +3,8 @@ import { Tag } from "antd";
 
 function Status({ type }) {
   const type2color = {
-    "Frozen": "#ddd",
-    "Active": "#87d068",
+    "Staging": "#ddd",
+    "Booting": "#87d068",
     "Broken": "#f50"
   }
 
