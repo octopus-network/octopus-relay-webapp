@@ -73,7 +73,7 @@ function StakeModal({ visible, appchainId, onCancel }): React.ReactElement {
     let hexId = '';
     try {
       let u8a = decodeAddress(validatorAccount);
-      hexId = u8aToHex(u8a);
+      hexId = u8aToHex(u8a, -1, false);
     } catch(err) {
       
       message.error('Invalid account!');
