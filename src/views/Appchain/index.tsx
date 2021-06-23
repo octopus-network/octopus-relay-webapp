@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 
 import { ApiPromise, WsProvider } from '@polkadot/api';
-import { formatBalance } from '@polkadot/util';
+import { formatBalance, u8aToHex } from '@polkadot/util';
 import { encodeAddress } from '@polkadot/util-crypto';
 
 import { utils } from "near-api-js";
@@ -98,7 +98,11 @@ function Appchain(): React.ReactElement {
       dataIndex: "id",
       key: "id",
       render: (accountId) => {
-        const ss58Address = encodeAddress(accountId);
+      
+        const ss58Address = encodeAddress(
+          u8aToHex(accountId)
+        );
+
         return (
           <CopyToClipboard
             text={ss58Address}
@@ -117,8 +121,8 @@ function Appchain(): React.ReactElement {
       },
     },
     {
-      title: "Weight",
-      dataIndex: "weight",
+      title: "Staked Amount",
+      dataIndex: "staked_amount",
       render: (value) => {
         return <span>{value}</span>;
       },
