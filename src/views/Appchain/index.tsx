@@ -98,7 +98,9 @@ function Appchain(): React.ReactElement {
       dataIndex: "id",
       key: "id",
       render: (accountId) => {
-      
+        if (!/0x/i.test(accountId)) {
+          accountId = '0x' + accountId;
+        }
         const ss58Address = encodeAddress(
           accountId
         );

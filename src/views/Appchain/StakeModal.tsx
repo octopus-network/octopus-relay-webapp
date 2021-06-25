@@ -51,7 +51,7 @@ function StakeModal({ visible, appchainId, onCancel }): React.ReactElement {
     setAppchainLoading(true);
     Promise.all([
       window.contract.get_appchain({ appchain_id: appchainId }),
-      window.contract.get_minium_staking_amount(),
+      window.contract.get_minimum_staking_amount(),
     ])
       .then(([appchain, oAmount]) => {
         const amount = fromDecimals(oAmount);
@@ -73,9 +73,8 @@ function StakeModal({ visible, appchainId, onCancel }): React.ReactElement {
     let hexId = '';
     try {
       let u8a = decodeAddress(validatorAccount);
-      hexId = u8aToHex(u8a, -1, false);
+      hexId = u8aToHex(u8a);
     } catch(err) {
-      
       message.error('Invalid account!');
       return;
     }
