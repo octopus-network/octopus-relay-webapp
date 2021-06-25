@@ -33,7 +33,7 @@ export async function initContract() {
       viewMethods: [
         "get_appchain",
         "get_num_appchains",
-        "get_curr_validator_set_index",
+        "get_curr_validator_set_len",
         "get_appchain_minium_validators",
         "get_appchains",
         "get_total_staked_balance",

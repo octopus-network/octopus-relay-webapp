@@ -3,7 +3,6 @@ import React, { useCallback, useEffect, useState } from "react";
 import { Button, message, Pagination, Empty, Col, Row } from "antd";
 import { PlusOutlined, RightOutlined, LoadingOutlined } from "@ant-design/icons";
 
-import Big from "big.js";
 import { Link, useNavigate } from "react-router-dom";
 import styles from "./styles.less";
 
@@ -145,19 +144,6 @@ function AppchainList(): React.ReactElement {
           <Empty description={<span style={{ color: '#7c7c7c' }}>There is no appchains</span>} />
         </div>
       }
-      {/* <Card bordered={false}>
-        <Table
-          rowKey={(record) => record.id}
-          columns={columns}
-          loading={isLoading}
-          dataSource={appchains}
-          onRow={(record) => {
-            return {
-              onClick: (event) => navigate(`/appchain/${record.id}`),
-            };
-          }}
-        />
-      </Card> */}
      
     </div>
   );

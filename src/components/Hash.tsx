@@ -40,7 +40,7 @@ const Hash = ({
   return (
     <StyleBlockContainer title={value} style={style} placement="topLeft">
       <span>{value.substr(0,4)}</span>
-      {hashArr.map((hex, idx) => <StyledBlock colorHex={hex} />)}
+      {hashArr.map((hex, idx) => <StyledBlock colorHex={hex} key={`hash-block-${idx}`} />)}
       <span>{value.substr(-2)}</span>
       <CopyToClipboard text={noCopy0x ? value.substr(2) : value} onCopy={() => message.info("Copied!")} 
         style={{ color: '#9c9c9c', padding: '5px' }}>

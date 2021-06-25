@@ -100,7 +100,7 @@ function Appchain(): React.ReactElement {
       render: (accountId) => {
       
         const ss58Address = encodeAddress(
-          u8aToHex(accountId)
+          accountId
         );
 
         return (
@@ -141,9 +141,8 @@ function Appchain(): React.ReactElement {
     
     Promise.all([
       window.contract.get_appchain({ appchain_id: id }),
-      window.contract.get_curr_validator_set_index({ appchain_id: id }),
+      window.contract.get_curr_validator_set_len({ appchain_id: id }),
     ]).then(([appchain, idx]) => {
-      console.log(appchain);
       setIsLoading(false);
       setAppchain(readableAppchain(appchain));
       setCurrValidatorSetIdx(idx);
@@ -151,8 +150,6 @@ function Appchain(): React.ReactElement {
       if (appchain.status == 'Booting') {
         initAppchain(appchain);
       }
-      // initAppchain('wss://barnacle-dev.rpc.testnet.oct.network:9944');
-      // getValidators(appchainId, idx);
     });
   }, [id]);
 
