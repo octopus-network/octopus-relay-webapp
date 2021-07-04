@@ -49,7 +49,8 @@ export async function initContract() {
         "freeze_appchain",
         "remove_appchain",
         "pass_appchain",
-        "appchain_go_staging"
+        "appchain_go_staging",
+        "update_subql_url"
       ],
     }
   );

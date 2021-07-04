@@ -32,7 +32,8 @@ import {
   MailOutlined,
   CloudServerOutlined,
   LinkOutlined,
-  LoadingOutlined
+  LoadingOutlined,
+  GlobalOutlined
 } from "@ant-design/icons";
 
 import { Link, useNavigate, useParams, useLocation } from "react-router-dom";
@@ -48,6 +49,7 @@ import RPCModal from './RPCModal';
 import DeployModal from './DeployModal';
 import ApproveModal from "./ApproveModal";
 import ActivateModal from "./ActivateModal";
+import SubqlModal from "./SubqlModal";
 import StakeModal from "./StakeModal";
 import Hash from '../../components/Hash';
 
@@ -75,6 +77,7 @@ function Appchain(): React.ReactElement {
   const [approveModalVisible, setApproveModalVisible] = useState(false);
   const [activateModalVisible, setActivateModalVisible] = useState(false);
   const [stakeModalVisible, setStakeModalVisible] = useState(false);
+  const [subqlModalVisible, setSubqlModalVisible] = useState(false);
 
   const [api, setApi] = useState<any>();
 
@@ -145,6 +148,7 @@ function Appchain(): React.ReactElement {
       window.contract.get_appchain({ appchain_id: id }),
       window.contract.get_curr_validator_set_len({ appchain_id: id }),
     ]).then(([appchain, idx]) => {
+      console.log(appchain);
       setIsLoading(false);
       setAppchain(readableAppchain(appchain));
       setCurrValidatorSetIdx(idx);
@@ -389,6 +393,10 @@ function Appchain(): React.ReactElement {
                 appchain?.status == 'Staging' ?
                 <Button type='primary' onClick={() => setActivateModalVisible(true)}>
                   Activate
+                </Button> :
+                appchain?.status == 'Booting' ?
+                <Button type='primary' onClick={() => setSubqlModalVisible(true)}>
+                  Update Subql Url
                 </Button> : null
               }
               {
@@ -477,6 +485,20 @@ function Appchain(): React.ReactElement {
                 target='_blank'
               >
                 <LinkOutlined /> Website
+              </a>
+            )}
+
+            {appchain?.subql_url && appchain.status == 'Booting' && (
+              <a
+                className={classnames(styles.tag, styles.link)}
+                href={
+                  window.contractName == 'octopus-relay.testnet' ? 
+                  `http://explorer.oct.network/?appchain=${id}` : 
+                  `http://explorer.dev.oct.network/?appchain=${id}`
+                }
+                target='_blank'
+              >
+                <GlobalOutlined /> Explorer
               </a>
             )}
             {appchain && (
@@ -726,6 +748,7 @@ function Appchain(): React.ReactElement {
       <DeployModal appchain={appchain} visible={deployModalVisible} onCancel={() => setDeployModalVisible(false)} />
       {/* <ApproveModal visible={approveModalVisible} appchainId={appchain?.id} onCancel={() => setApproveModalVisible(false)} /> */}
       <ActivateModal visible={activateModalVisible} appchainId={appchain?.id} onCancel={() => setActivateModalVisible(false)} />
+      <SubqlModal subqlUrl={appchain?.subql_url || ''} visible={subqlModalVisible} appchainId={appchain?.id} onCancel={() => setSubqlModalVisible(false)} />
       <StakeModal visible={stakeModalVisible} appchainId={appchain?.id} onCancel={() => setStakeModalVisible(false)} />
     </div>
   );

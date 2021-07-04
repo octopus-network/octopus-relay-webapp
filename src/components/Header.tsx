@@ -5,7 +5,6 @@ import { RightOutlined, UserOutlined } from "@ant-design/icons";
 
 import styled from "styled-components";
 
-import TokenBadge from "../components/TokenBadge";
 import logo from "../assets/logo.png";
 
 import { Link, useLocation } from "react-router-dom";
@@ -144,24 +143,18 @@ function Header(): React.ReactElement {
                 <Link to="/appchains">Appchains</Link>
               </Menu.Item>
               <Menu.Item key="bridge">
-                <a href={window.contractName == 'octopus-relay.testnet' ? 'https://bridge.testnet.oct.network' : 'https://bridge.dev.oct.network'} target="_blank">Bridge</a>
+                <a href={
+                  window.contractName == 'octopus-relay.testnet' ? 
+                  'https://bridge.testnet.oct.network' : 
+                  'https://bridge.dev.oct.network'} 
+                  target="_blank">Bridge</a>
               </Menu.Item>
               <Menu.Item key="docs">
-                <a
-                  href="https://github.com/octopus-network/pallet-octopus-appchain#octopus-appchain-pallet"
-                  target="_blank"
-                >
+                <a href="https://docs.oct.network/en" target="_blank">
                   Docs
                 </a>
               </Menu.Item>
-              <Menu.Item key="guide">
-                <a
-                  href="https://github.com/octopus-network/pallet-octopus-appchain/blob/master/docs/Appchain_Guide.md"
-                  target="_blank"
-                >
-                  Guide
-                </a>
-              </Menu.Item>
+              
             </Menu>
           </div>
         </div>

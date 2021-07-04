@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 
 import { Button, message, Pagination, Empty, Col, Row } from "antd";
-import { PlusOutlined, RightOutlined, LoadingOutlined } from "@ant-design/icons";
+import { PlusOutlined, RightOutlined, LoadingOutlined, GlobalOutlined } from "@ant-design/icons";
 
 import { Link, useNavigate } from "react-router-dom";
 import styles from "./styles.less";
@@ -97,7 +97,7 @@ function AppchainList(): React.ReactElement {
 
         appchains?.length ?
         <>
-          {appchains.map(({ id, founder_id, validators, bond_tokens, status }, idx) => {
+          {appchains.map(({ id, founder_id, validators, bond_tokens, status, subql_url }, idx) => {
             
             return (
               <Row key={idx} className={styles.appchain} justify="center" 
@@ -105,24 +105,23 @@ function AppchainList(): React.ReactElement {
                 <Col span={4} className={styles.name}>{id}</Col>
                 <Col span={5}>{founder_id}</Col>
                 <Col span={5}>{validators.length}</Col>
-                <Col span={5}>{bond_tokens} OCT</Col>
+                <Col span={4}>{bond_tokens} OCT</Col>
                 <Col span={4}>
                   <span className={`${styles.status} ${styles[status]}`}>
                     {status}
                   </span>
                 </Col>
-                <Col span={1}>
-                  {/* <ActionButtons
-                    founder_id={founder_id}
-                    onActive={() => activeAppchain(id)}
-                    onFreeze={() => freezeAppchain(id)}
-                    onRemove={() => removeAppchain(id)}
-                    onStake={() => {
-                      setAppchainId(id);
-                      toggleStakingModalVisible();
-                    }}
-                  /> */}
+                <Col span={2}>
                   <Row align="middle" justify="end">
+                    {
+                      status == 'Booting' && subql_url ?
+                      <Button shape="circle" icon={<GlobalOutlined />} href={
+                          window.contractName == 'octopus-relay.testnet' ? 
+                          `http://explorer.oct.network/?appchain=${id}` : 
+                          `http://explorer.dev.oct.network/?appchain=${id}`
+                        } target="_blank" style={{ marginRight: 10, border: 'none' }} /> :
+                      null
+                    }
                     <RightOutlined
                       style={{ fontSize: "14px", color: "#ccc" }}
                     />
