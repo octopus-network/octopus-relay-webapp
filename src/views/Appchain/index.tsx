@@ -370,11 +370,6 @@ function Appchain(): React.ReactElement {
             >
               {appchain?.status}
             </span>
-            {/* <div className={styles.vote}>
-              <span className={classnames(styles.btn, styles.up)}><UpOutlined /></span>
-              <span className={styles.num}>0</span>
-              <span className={classnames(styles.btn, styles.down)}><DownOutlined /></span>
-            </div> */}
           </div>
         </div>
         <div className={styles.right}>
