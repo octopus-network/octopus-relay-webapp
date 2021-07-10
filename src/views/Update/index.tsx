@@ -40,6 +40,7 @@ function Update(): React.ReactElement {
     const {
       github_release,
       commit_id,
+      email,
       website_url,
       github_address,
     } = values;
@@ -52,6 +53,7 @@ function Update(): React.ReactElement {
           github_address: github_address || "",
           github_release,
           commit_id,
+          email,
           chain_spec_url: '',
           chain_spec_hash: '',
         },
@@ -77,6 +79,7 @@ function Update(): React.ReactElement {
           website_url: appchain.website_url,
           github_address: appchain.github_address,
           github_release: appchain.github_release,
+          email: appchain.email,
           commit_id: appchain.commit_id,
         });
       })
@@ -126,6 +129,11 @@ function Update(): React.ReactElement {
             { required: true, message: 'please input the commit id' }
           ]}>
             <Input placeholder='commit id' size='large' />
+          </Form.Item>
+          <Form.Item label='Email' name='email' rules={[
+            { required: true, message: 'please input your email' }
+          ]}>
+            <Input placeholder='email' size='large' />
           </Form.Item>
           <Form.Item wrapperCol={{ span: 24 }}>
             <Row justify="space-between" align="middle">
