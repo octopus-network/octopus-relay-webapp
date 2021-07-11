@@ -25,7 +25,7 @@
     }
   },
   "ObservationPayload": {
-    "public": "Public",
+    "public": "AccountId",
     "block_number": "BlockNumber",
     "fact_sequence": "u64",
     "observation": "Observation<AccountId>"
