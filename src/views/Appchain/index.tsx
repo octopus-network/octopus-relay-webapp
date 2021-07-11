@@ -219,6 +219,7 @@ function Appchain(): React.ReactElement {
   const [totalIssuance, setTotalIssuance] = useState('0');
   const [isRemoving, setIsRemoving] = useState(false);
   const [isApproving, setIsApproving] = useState(false);
+  const [isFreezing, setIsFreezing] = useState(false);
 
   const initAppchain = async (appchain) => {
     
@@ -330,6 +331,24 @@ function Appchain(): React.ReactElement {
     });
   }
 
+  const onFreezeAppchain = () => {
+    setIsFreezing(true);
+    window.contract.freeze_appchain(
+      {
+        appchain_id: id
+      },
+      BOATLOAD_OF_GAS,
+      0
+    )
+    .then(() => {
+      navigate(0);
+    })
+    .catch((err) => {
+      setIsFreezing(false);
+      message.error(err.toString());
+    });
+  }
+
   const onGoStaging = () => {
     setIsApproving(true);
     window.contract.appchain_go_staging(
@@ -390,9 +409,14 @@ function Appchain(): React.ReactElement {
                   Activate
                 </Button> :
                 appchain?.status == 'Booting' ?
-                <Button type='primary' onClick={() => setSubqlModalVisible(true)}>
-                  Update Subql Url
-                </Button> : null
+                <>
+                  <Button type='primary' onClick={() => setSubqlModalVisible(true)}>
+                    Update Subql Url
+                  </Button>
+                  <Button loading={isFreezing} onClick={onFreezeAppchain} style={{ marginLeft: 10 }}>
+                    Freeze Appchain
+                  </Button>
+                </> : null
               }
               {
                 appchain?.status == 'Auditing' &&
