@@ -226,7 +226,10 @@ function Appchain(): React.ReactElement {
     let types = {};
     try {
       types = await require(`../../customTypes/${appchain.id}.json`);
-    } catch(err) {}
+      
+    } catch(err) {
+      types = await require(`../../customTypes/defaultAppchain.json`);
+    }
     
     setAppchainInitializing(true);
     let provider = new WsProvider(appchain.rpc_endpoint);
