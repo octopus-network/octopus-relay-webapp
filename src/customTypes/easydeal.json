@@ -23,5 +23,11 @@
       "UpdateValidatorSet": "(ValidatorSet)",
       "LockToken": "(LockEvent)"
     }
+  },
+  "ObservationPayload": {
+    "public": "Public",
+    "block_number": "BlockNumber",
+    "fact_sequence": "u64",
+    "observation": "Observation<AccountId>"
   }
 }
