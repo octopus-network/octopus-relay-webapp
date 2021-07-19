@@ -149,6 +149,9 @@ function Header(): React.ReactElement {
                   'https://bridge.dev.oct.network'} 
                   target="_blank">Bridge</a>
               </Menu.Item>
+              <Menu.Item key="faucet">
+                <a href='https://faucet.testnet.oct.network' target="_blank">Faucet</a>
+              </Menu.Item>
               <Menu.Item key="docs">
                 <a href="https://docs.oct.network/en" target="_blank">
                   Docs
