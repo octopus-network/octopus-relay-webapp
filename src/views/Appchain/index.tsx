@@ -143,7 +143,7 @@ function Appchain(): React.ReactElement {
 
   useEffect(() => {
     setIsLoading(true);
-    
+
     Promise.all([
       window.contract.get_appchain({ appchain_id: id }),
       window.contract.get_curr_validator_set_len({ appchain_id: id }),
@@ -222,15 +222,15 @@ function Appchain(): React.ReactElement {
   const [isFreezing, setIsFreezing] = useState(false);
 
   const initAppchain = async (appchain) => {
-    
+
     let types = {};
     try {
       types = await require(`../../customTypes/${appchain.id}.json`);
-      
+
     } catch(err) {
       types = await require(`../../customTypes/defaultAppchain.json`);
     }
-    
+
     setAppchainInitializing(true);
     let provider = new WsProvider(appchain.rpc_endpoint);
     const api = new ApiPromise({ provider, types: types || {} });
@@ -260,13 +260,13 @@ function Appchain(): React.ReactElement {
         const totalIssuance = await api.query.balances?.totalIssuance();
         setTotalIssuance(
           formatBalance(
-            totalIssuance, { 
+            totalIssuance, {
               decimals: api.registry?.chainDecimals[0],
-              withUnit: false 
+              withUnit: false
             }
           ) + api.registry?.chainTokens[0]
         );
-        
+
       }
     });
 
@@ -406,7 +406,7 @@ function Appchain(): React.ReactElement {
                 appchain?.status == 'InQueue' ?
                 <Button type='primary' loading={isApproving} onClick={onGoStaging}>
                   Go staging
-                </Button> : 
+                </Button> :
                 appchain?.status == 'Staging' ?
                 <Button type='primary' onClick={() => setActivateModalVisible(true)}>
                   Activate
@@ -427,7 +427,7 @@ function Appchain(): React.ReactElement {
                   title="Are you sure to reject this appchain?"
                   onConfirm={() => onRemoveAppchain(appchain?.id)}
                 >
-                  <Button type="ghost" danger disabled={isRemoving} loading={isRemoving} 
+                  <Button type="ghost" danger disabled={isRemoving} loading={isRemoving}
                     style={{ background: 'transparent' }}>
                     Reject
                   </Button>
@@ -449,15 +449,15 @@ function Appchain(): React.ReactElement {
                 {
                   (
                     appchain?.status == 'Booting' ||
-                    appchain?.status == 'Staging' 
+                    appchain?.status == 'Staging'
                   ) &&
                   <Button onClick={() => setStakeModalVisible(true)}
                   >
                     Stake
                   </Button>
                 }
-                <Button 
-                  icon={<CloudServerOutlined />} 
+                <Button
+                  icon={<CloudServerOutlined />}
                   disabled={!appchainInitialized}
                   onClick={() => setDeployModalVisible(true)}
                 >
@@ -473,11 +473,11 @@ function Appchain(): React.ReactElement {
                   RPC Call
                 </Button>
                 </>
-              } 
-                
+              }
+
             </div>
           }
-          
+
         </div>
       </div>
 
@@ -498,8 +498,8 @@ function Appchain(): React.ReactElement {
                 at block #{appchain.block_height}
               </span>
             )}
-        
-            
+
+
             {appchain?.website_url && (
               <a
                 className={classnames(styles.tag, styles.link)}
@@ -514,8 +514,8 @@ function Appchain(): React.ReactElement {
               <a
                 className={classnames(styles.tag, styles.link)}
                 href={
-                  window.contractName == 'octopus-relay.testnet' ? 
-                  `http://explorer.oct.network/?appchain=${id}` : 
+                  window.contractName == 'octopus-relay.testnet' ?
+                  `http://explorer.oct.network/?appchain=${id}` :
                   `http://explorer.dev.oct.network/?appchain=${id}`
                 }
                 target='_blank'
@@ -565,7 +565,7 @@ function Appchain(): React.ReactElement {
             <Descriptions.Item label="Chain Spec">
               {appchain ? (
                 appchain.chain_spec_url ? (
-                  
+
                   <Row>
                     <Col span={24}>
                       <Tooltip title={appchain.chain_spec_url}>
@@ -588,7 +588,7 @@ function Appchain(): React.ReactElement {
                       <Hash value={appchain?.chain_spec_hash} noCopy0x />
                     </Col>
                   </Row>
-     
+
                 ) : (
                   <span>Not Provided</span>
                 )
@@ -722,22 +722,22 @@ function Appchain(): React.ReactElement {
                   text={`Hello Octopus team, just finished my appchain registration: ${window.location.href}, please check. Thanks~`}
                   onCopy={() => message.info("Link copied!")}
                 >
-                  <Button key="copy" icon={<CopyOutlined />}>Copy link</Button>
+                  <Button key="copy" icon={<CopyOutlined />}>Copy mail body</Button>
                 </CopyToClipboard>,
-                
+
                 <Button key="email" type="ghost" icon={<MailOutlined />} href={`mailto:appchain@oct.network`} target="_blank"
                   style={{ borderColor: '#53ab90', color: '#53ab90' }}>Send email</Button>
-              
+
               ]}
             />
           </div> :
           <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} style={{ flex: 1, margin: '0', height: '62px' }}
             description='Appchain is not ready' />
         }
-        
+
       </div>
-      <div className={styles.explorer} style={{ 
-        marginTop: '30px', 
+      <div className={styles.explorer} style={{
+        marginTop: '30px',
         display: window.accountId == appchain?.founder_id && appchain?.status == 'Auditing' ? 'none' : 'block'
       }}>
         <Tabs defaultActiveKey={tab || 'blocks'} onChange={onTabChange}>
@@ -765,7 +765,7 @@ function Appchain(): React.ReactElement {
           </Tabs.TabPane>
         </Tabs>
       </div>
-      <RPCModal api={api} visible={rpcModalVisible} onOk={onRPCCallOk} 
+      <RPCModal api={api} visible={rpcModalVisible} onOk={onRPCCallOk}
         onCancel={() => setRPCModalVisible(false)} />
       <DeployModal appchain={appchain} visible={deployModalVisible} onCancel={() => setDeployModalVisible(false)} />
       {/* <ApproveModal visible={approveModalVisible} appchainId={appchain?.id} onCancel={() => setApproveModalVisible(false)} /> */}
