@@ -1,4 +1,6 @@
 {
+  "BeefyKey": "[u8; 33]",
+  "SessionKeys5B": "(AccountId, AccountId, AccountId, AccountId, BeefyKey)",
   "Validator": {
     "id": "AccountId",
     "weight": "u128"
