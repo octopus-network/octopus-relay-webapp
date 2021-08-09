@@ -89,7 +89,7 @@ function Register(): React.ReactElement {
                     return Promise.reject(new Error("appchain name have been used"));
                   }
                   return Promise.resolve();
-                });
+                }).catch(err => {});
               },
             }
           ]}>
