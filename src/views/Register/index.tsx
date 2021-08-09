@@ -84,12 +84,17 @@ function Register(): React.ReactElement {
                 if (!value) {
                   return Promise.reject(new Error("please input your appchain name"));
                 }
-                return window.contract.get_appchain({ appchain_id: value }).then(appchain => {
-                  if (appchain !== null) {
-                    return Promise.reject(new Error("appchain name have been used"));
-                  }
-                  return Promise.resolve();
-                }).catch(err => {});
+                return window.contract.get_appchain({ appchain_id: value })
+                  .then(appchain => {
+                    if (appchain !== null) {
+                      return Promise.reject(new Error("appchain name have been used"));
+                    }
+                    return Promise.resolve(null);
+                  }).catch(err => {
+                    if (err.message == "appchain name have been used") {
+                      return Promise.reject(err);
+                    }
+                  });
               },
             }
           ]}>
