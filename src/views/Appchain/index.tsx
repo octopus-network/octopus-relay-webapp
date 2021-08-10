@@ -403,7 +403,7 @@ function Appchain(): React.ReactElement {
                 <Button type='primary' loading={isApproving} icon={<CheckOutlined />} onClick={onPassAppchain}>
                   Pass
                 </Button> :
-                appchain?.status == 'InQueue' ?
+                appchain?.status == 'Voting' ?
                 <Button type='primary' loading={isApproving} onClick={onGoStaging}>
                   Go staging
                 </Button> : 
