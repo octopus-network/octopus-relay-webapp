@@ -232,7 +232,7 @@ function Appchain(): React.ReactElement {
     }
     
     setAppchainInitializing(true);
-    let provider = new WsProvider('wss://gateway.testnet.octopus.network/barnacle/c2b940112e5dfee04d8569bc00412bba');
+    let provider = new WsProvider(appchain.rpc_endpoint);
     const api = new ApiPromise({ provider, types: types || {} });
 
     api.on('connected', () => {
