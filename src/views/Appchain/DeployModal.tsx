@@ -194,7 +194,11 @@ function DeployModal({ appchain, visible, onCancel }): React.ReactElement {
             {
               (state == '12') &&
               <>
-                <Button loading={isDestroying} onClick={() => onDestroy(uuid)}>Destroy</Button>
+                <Button onClick={() => {
+                  setIsOnApply(false);
+                  setIsPasswordModalOpen(true);
+                  setSelectedUUID(uuid);
+                }}>Destroy</Button>
                 <Button href={record.instance.ssh_key} icon={<VerticalAlignBottomOutlined />}>RSA</Button>
               </>
             }
