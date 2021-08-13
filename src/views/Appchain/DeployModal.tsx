@@ -122,7 +122,7 @@ function DeployModal({ appchain, visible, onCancel }): React.ReactElement {
           '11': { label: 'apply failed', color: 'red' },
           '12': { label: 'apply success', color: 'green' },
           '20': { label: 'destroying', color: 'cyan' },
-          '21': { label: 'destroyed', color: 'magenta' },
+          '21': { label: 'destroy failed', color: 'magenta' },
           '22': { label: 'destroyed', color: 'magenta' }
         }
         return <Tag color={states[state].color}>{states[state] ? states[state].label : state}</Tag>
@@ -175,15 +175,17 @@ function DeployModal({ appchain, visible, onCancel }): React.ReactElement {
             {
               (state == '0') && 
               <Button onClick={() => {
+                setInputedSecretKey('');
                 setIsOnApply(true);
                 setIsPasswordModalOpen(true);
                 setSelectedUUID(uuid);
               }}>Apply</Button>
             }
             {
-              (state == '11') &&
+              (state == '11' || state == '21') &&
               <>
                 <Button onClick={() => {
+                  setInputedSecretKey('');
                   setIsOnApply(false);
                   setIsPasswordModalOpen(true);
                   setSelectedUUID(uuid);
@@ -209,7 +211,7 @@ function DeployModal({ appchain, visible, onCancel }): React.ReactElement {
               </Button>
             }
             {
-              (state == '0' || state == '21' || state == '22') &&
+              (state == '0' || state == '22') &&
               <Button loading={isDeleting} danger type="text" onClick={() => onDelete(uuid)}>Delete</Button>
             }
           </Space>
