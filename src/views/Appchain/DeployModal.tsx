@@ -1,5 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Modal, Input, Button, Row, Col, Table, Select, Space, Form, Tag, message } from 'antd';
+import { 
+  Modal, Input, Button, Row, Col, Table, Select, Space, Form, Tag, message 
+} from 'antd';
 
 import { ArrowRightOutlined, LeftOutlined, VerticalAlignBottomOutlined } from '@ant-design/icons';
 
@@ -16,6 +18,17 @@ const wsHost = 'wss://chuubnzu9i.execute-api.ap-northeast-1.amazonaws.com';
 function getCloudVendorKey(appchainId, cloudVendor, accessKey) {
   return `appchain-${appchainId}-cloud-${cloudVendor}-${accessKey}`;
 }
+
+const baseImages = [
+  {
+    image: 'gcr.io/octopus-dev-309403/substrate-octopus@sha256:5b4694fa7bf522fee76ecd607a76e312b19757005977de4c7c0c2c9869e31934',
+    label: 'Substrate 0.9.8'
+  },
+  {
+    image: '',
+    label: 'Default'
+  }
+]
 
 function getLocalStorageKey(appchainId) {
   return `cloud-vendor-key-appchain-${appchainId}`;
@@ -50,11 +63,17 @@ function DeployModal({ appchain, visible, onCancel }): React.ReactElement {
 
   const [isWSReady, setIsWSReady] = useState(false);
 
-  const [applying, setApplying] = useState({});
+  const [isApplying, setIsApplying] = useState(false);
+  const [isDestroying, setIsDestroying] = useState(false);
+  const [isOnApply, setIsOnApply] = useState(false);
+  const [inputedSecretKey, setInputedSecretKey] = useState('');
+
+  const [selectedUUID, setSelectedUUID] = useState('');
   const [destroying, setDestroying] = useState({});
   const [detailLoading, setDetailLoading] = useState({});
   const [deleting, setDeleting] = useState({});
-
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+  
   const [deployLogs, setDeployLogs] = useState({});
 
   const [showLogUUID, setShowLogUUID] = useState('');
@@ -103,8 +122,8 @@ function DeployModal({ appchain, visible, onCancel }): React.ReactElement {
           '11': { label: 'apply failed', color: 'red' },
           '12': { label: 'apply success', color: 'green' },
           '20': { label: 'destroying', color: 'cyan' },
-          '21': { label: 'destoryed', color: 'magenta' },
-          '22': { label: 'destoryed', color: 'magenta' }
+          '21': { label: 'destroyed', color: 'magenta' },
+          '22': { label: 'destroyed', color: 'magenta' }
         }
         return <Tag color={states[state].color}>{states[state] ? states[state].label : state}</Tag>
       }
@@ -123,11 +142,29 @@ function DeployModal({ appchain, visible, onCancel }): React.ReactElement {
       }
     },
     {
+      title: 'Image',
+      key: 'image',
+      render: (record) => {
+        const { task } = record;
+        let baseImage = baseImages[0];
+        for (let i = 0; i < baseImages.length; i++) {
+          baseImage = baseImages[i];
+          if (baseImage.image == task.base_image) {
+            break;
+          }
+        }
+       
+        return (
+          <span>{baseImage.label}</span>
+        )
+      }
+    },
+    {
       title: 'Action',
       key: 'action',
       render: (record) => {
         const { uuid, state } = record;
-        const isApplying = applying[uuid];
+       
         const isDestroying = destroying[uuid];
 
         const isLoadingDetail = detailLoading[uuid];
@@ -137,22 +174,39 @@ function DeployModal({ appchain, visible, onCancel }): React.ReactElement {
           <Space>
             {
               (state == '0') && 
-              <Button loading={isApplying} onClick={() => onApply(uuid)}>Apply</Button>
+              <Button onClick={() => {
+                setIsOnApply(true);
+                setIsPasswordModalOpen(true);
+                setSelectedUUID(uuid);
+              }}>Apply</Button>
+            }
+            {
+              (state == '11') &&
+              <>
+                <Button onClick={() => {
+                  setIsOnApply(false);
+                  setIsPasswordModalOpen(true);
+                  setSelectedUUID(uuid);
+                }}>Destroy</Button>
+               
+              </>
             }
             {
               (state == '12') &&
               <>
-              <Button loading={isDestroying} onClick={() => onDestroy(uuid)}>Destroy</Button>
-              <Button href={record.instance.ssh_key} icon={<VerticalAlignBottomOutlined />}>RSA</Button>
+                <Button loading={isDestroying} onClick={() => onDestroy(uuid)}>Destroy</Button>
+                <Button href={record.instance.ssh_key} icon={<VerticalAlignBottomOutlined />}>RSA</Button>
               </>
             }
             {
               (state == '10' || state == '20') &&
-              <Button loading={isLoadingDetail} onClick={() => onShowLog(uuid)}>Deploy Log</Button>
+              <Button loading={isLoadingDetail} onClick={() => onShowLog(uuid)}>
+                { state == '10' ? 'Deploy log' : 'Destroy log' }
+              </Button>
             }
             {
-              (state == '11' || state == '21' || state == '22') &&
-              <Button loading={isDeleting} onClick={() => onDelete(uuid)}>Delete</Button>
+              (state == '0' || state == '21' || state == '22') &&
+              <Button loading={isDeleting} danger type="text" onClick={() => onDelete(uuid)}>Delete</Button>
             }
           </Space>
         );
@@ -207,13 +261,13 @@ function DeployModal({ appchain, visible, onCancel }): React.ReactElement {
   }
 
   const onDeploy = async (fields) => {
-    setIsDeploying(true);
+    
+    const { cloudVendor, accessKey, baseImage } = fields;
 
-    const { cloudVendor, accessKey, accessSecret } = fields;
-
-    if (!cloudVendor||!accessKey||!accessSecret) {
-      return message.error('Fields missed!');
+    if (!cloudVendor || !accessKey || !baseImage) {
+      return message.error('Missing parameters!');
     }
+    setIsDeploying(true);
 
     const { chain_spec_url, chain_spec_hash, boot_nodes } = appchain;
 
@@ -229,7 +283,7 @@ function DeployModal({ appchain, visible, onCancel }): React.ReactElement {
           bootnodes: boot_nodes ? boot_nodes.replaceAll(/(\[|\]|")/g, '').split(',').filter(a => a.replaceAll(/\s/g, '')) : [],
           cloud_vendor: cloudVendor,
           access_key: accessKey,
-          secret_key: accessSecret,
+          base_image: baseImage,
         }
       }).then(res => res.data);
 
@@ -245,16 +299,15 @@ function DeployModal({ appchain, visible, onCancel }): React.ReactElement {
     setIsDeploying(false);
   }
 
-  const onApply = async (uuid) => {
-    setApplying({ ...applying, [uuid]: true });
-
+  const onApply = async () => {
+    setIsApplying(true);
+    
     try {
-
       const res = await axios({
         method: 'put',
-        url: `${apiHost}/api/tasks/${uuid}`,
+        url: `${apiHost}/api/tasks/${selectedUUID}`,
         headers: { authorization: cloudVendorKey },
-        data: { action: 'apply' }
+        data: { action: 'apply', secret_key: inputedSecretKey }
       }).then(res => res.data);
       console.log(res);
 
@@ -264,20 +317,20 @@ function DeployModal({ appchain, visible, onCancel }): React.ReactElement {
       message.error('Apply error!');
       console.log(err);
     }
-
-    setApplying({ ...applying, [uuid]: false });
+    setIsPasswordModalOpen(false);
+    setIsApplying(false);
   }
 
   const onDestroy = async (uuid) => {
-    setDestroying({ ...destroying, [uuid]: true });
+    setIsDestroying(true);
 
     try {
 
       const res = await axios({
         method: 'put',
-        url: `${apiHost}/api/tasks/${uuid}`,
+        url: `${apiHost}/api/tasks/${selectedUUID}`,
         headers: { authorization: cloudVendorKey },
-        data: { action: 'destroy' }
+        data: { action: 'destroy', secret_key: inputedSecretKey }
       }).then(res => res.data);
       console.log(res);
       
@@ -287,8 +340,8 @@ function DeployModal({ appchain, visible, onCancel }): React.ReactElement {
       message.error('Destroy error!');
       console.log(err);
     }
-
-    setDestroying({ ...destroying, [uuid]: false });
+    setIsPasswordModalOpen(false);
+    setIsDestroying(false);
   }
 
   const onDelete = async (uuid) => {
@@ -387,120 +440,150 @@ function DeployModal({ appchain, visible, onCancel }): React.ReactElement {
   }
  
   return (
-    <Modal visible={visible} title={false} onCancel={onCancel} 
-      destroyOnClose={true} footer={null} width={modalWidth} style={{ transition: 'width .3s ease' }}>
-     
-      {
-        cloudVendorKey ?
-        <div>
-          {
-            showLogUUID ?
-            <div>
-              <div style={{ display: 'flex', alignItems: 'cemter' }}>
-                <Button onClick={onHidLog} style={{ marginRight: '15px' }} type="primary" icon={<LeftOutlined />} />
-                <h3 style={{ fontSize: '20px' }}>Deploy Log</h3>
-              </div>
-              <div className={styles.deployLog} ref={logBoxRef}>
-                <p className={styles.logLine}>Polling {showLogUUID} logs...</p>
+    <>
+      <Modal visible={visible} title={false} onCancel={onCancel} 
+        destroyOnClose={true} footer={null} width={modalWidth} style={{ transition: 'width .3s ease' }}>
+      
+        {
+          cloudVendorKey ?
+          <div>
+            {
+              showLogUUID ?
+              <div>
+                <div style={{ display: 'flex', alignItems: 'cemter' }}>
+                  <Button onClick={onHidLog} style={{ marginRight: '15px' }} type="primary" icon={<LeftOutlined />} />
+                  <h3 style={{ fontSize: '20px' }}>Deploy Log</h3>
+                </div>
+                <div className={styles.deployLog} ref={logBoxRef}>
+                  <p className={styles.logLine}>Polling {showLogUUID} logs...</p>
+                  {
+                    !isWSReady &&
+                    <p className={styles.logLine}>Websocket is not ready, please try to refresh this page.</p>
+                  }
+                  {
+                    deployLogs[showLogUUID] && deployLogs[showLogUUID].map((line, idx) => {
+                      return (
+                        <p className={styles.logLine} key={idx}>{line}</p>
+                      );
+                    })
+                  }
+                </div>
+              </div> :
+              <>
+              <div style={{ marginBottom: '20px' }}>
                 {
-                  !isWSReady &&
-                  <p className={styles.logLine}>Websocket is not ready, please try to refresh this page.</p>
+                  deployingNew ?
+                  <h3 style={{ fontSize: '20px' }}>Deploy New Validator</h3> :
+                  <h3 style={{ fontSize: '20px' }}>Cloud / { getCloudVendor(cloudVendorKey) }</h3>
                 }
                 {
-                  deployLogs[showLogUUID] && deployLogs[showLogUUID].map((line, idx) => {
-                    return (
-                      <p className={styles.logLine} key={idx}>{line}</p>
-                    );
-                  })
+                  !deployingNew &&
+                  <Row align="middle">
+                    <Col flex={1}>
+                      <span style={{ fontSize: '14px', color: '#9c9c9c' }}>Access Key:</span>
+                      <span style={{ fontSize: '14px', marginLeft: '10px' }}>{ getAccessKey(cloudVendorKey) }</span>
+                    </Col>
+                    <Col>
+                      <Space>
+                        <Button type="primary" onClick={onDeployNew}>Deploy New</Button>
+                        <Button onClick={onLogout}>Logout</Button>
+                      </Space>
+                    </Col>
+                  </Row>
                 }
               </div>
-            </div> :
-            <>
-            <div style={{ marginBottom: '20px' }}>
-              {
-                deployingNew ?
-                <h3 style={{ fontSize: '20px' }}>Deploy New Validator</h3> :
-                <h3 style={{ fontSize: '20px' }}>Cloud / { getCloudVendor(cloudVendorKey) }</h3>
-              }
-              {
-                !deployingNew &&
-                <Row align="middle">
-                  <Col flex={1}>
-                    <span style={{ fontSize: '14px', color: '#9c9c9c' }}>Access Key:</span>
-                    <span style={{ fontSize: '14px', marginLeft: '10px' }}>{ getAccessKey(cloudVendorKey) }</span>
-                  </Col>
+              <div style={{ marginTop: '30px' }}>
+                {
+                  deployingNew ?
+                  <Form layout="horizontal" labelCol={{ span: 6 }} labelAlign="left" onFinish={onDeploy} initialValues={{
+                    cloudVendor: getCloudVendor(cloudVendorKey),
+                    accessKey: getAccessKey(cloudVendorKey),
+                    baseImage: baseImages[0].image
+                  }}>
+                    <Form.Item label="Coud Vendor" name="cloudVendor">
+                      <Input placeholder="Cloud vendor" disabled size="large" />
+                    </Form.Item>
+                    <Form.Item label="Access Key" name="accessKey">
+                      <Input placeholder="Cloud access key" disabled size="large" />
+                    </Form.Item>
+                    {/* <Form.Item label="Access Secret" required name="accessSecret" rules={[
+                      { required: true, message: 'Please input your access secret' }
+                    ]}>
+                      <Input.Password placeholder="Cloud access secret" size="large" />
+                    </Form.Item> */}
+                    <Form.Item label="Base Image" name="baseImage">
+                      <Select size="large">
+                        {
+                          baseImages.map((baseImage, idx) => (
+                            <Select.Option value={baseImage.image} key={`base-image-idx`}>{baseImage.label}</Select.Option>
+                          ))
+                        }
+                      </Select>
+                    </Form.Item>
+                    <Form.Item>
+                      <Row justify="end">
+                        <Space>
+                          <Button type="primary" size="large" htmlType="submit" 
+                            loading={isDeploying} disabled={isDeploying}>Deploy</Button>
+                          <Button size="large" onClick={onCancelDeploy}>Cancel</Button>
+                        </Space>
+                      </Row>
+                    </Form.Item>
+                  </Form> :
+                  <Table columns={columns} loading={isLoadingList} dataSource={taskList} 
+                    scroll={{ x: 900 }} rowKey={(record) => record.uuid} />
+                }
+              </div>
+            </>
+            }
+          </div> :
+          <div style={{ padding: '20px' }}>
+            <div style={{ marginBottom: '25px', fontWeight: 600, fontSize: '20px', width: '320px' }}>
+              <span>Choose your cloud vendor and input the access key</span>
+            </div>
+            <Row align="middle" justify="space-between" gutter={20}>
+              <Col flex={1} style={{ border: '1px solid #53ab90', borderRadius: '25px' }}>
+                <Row>
                   <Col>
-                    <Space>
-                      <Button type="primary" onClick={onDeployNew}>Deploy New</Button>
-                      <Button onClick={onLogout}>Logout</Button>
-                    </Space>
+                    <Select placeholder="Cloud vendor" defaultValue="aws" size="large" bordered={false} onChange={v => setCloudVendor(v)}>
+                      <Select.Option value='aws'>AWS</Select.Option>
+                    </Select>
+                  </Col>
+                  <Col flex={1}>
+                    <Input onChange={e => setAccessKey(e.target.value)} placeholder="Access key" bordered={false}
+                      size="large" style={{ borderRadius: '25px' }} />
                   </Col>
                 </Row>
-              }
-            </div>
-            <div style={{ marginTop: '30px' }}>
-              {
-                deployingNew ?
-                <Form layout="horizontal" labelCol={{ span: 6 }} labelAlign="left" onFinish={onDeploy} initialValues={{
-                  cloudVendor: getCloudVendor(cloudVendorKey),
-                  accessKey: getAccessKey(cloudVendorKey)
-                }}>
-                  <Form.Item label="Coud Vendor" name="cloudVendor">
-                    <Input placeholder="Cloud vendor" disabled size="large" />
-                  </Form.Item>
-                  <Form.Item label="Access Key" name="accessKey">
-                    <Input placeholder="Cloud access key" disabled size="large" />
-                  </Form.Item>
-                  <Form.Item label="Access Secret" required name="accessSecret" rules={[
-                    { required: true, message: 'Please input your access secret' }
-                  ]}>
-                    <Input.Password placeholder="Cloud access secret" size="large" />
-                  </Form.Item>
-                  <Form.Item>
-                    <Row justify="end">
-                      <Space>
-                        <Button type="primary" size="large" htmlType="submit" 
-                          loading={isDeploying} disabled={isDeploying}>Deploy</Button>
-                        <Button size="large" onClick={onCancelDeploy}>Cancel</Button>
-                      </Space>
-                    </Row>
-                  </Form.Item>
-                </Form> :
-                <Table columns={columns} loading={isLoadingList} dataSource={taskList} 
-                  scroll={{ x: 900 }} rowKey={(record) => record.uuid} />
-              }
-            </div>
-          </>
-          }
-        </div> :
-        <div style={{ padding: '20px' }}>
-          <div style={{ marginBottom: '25px', fontWeight: 600, fontSize: '20px', width: '320px' }}>
-            <span>Choose your cloud vendor and input the access key</span>
+              </Col>
+              <Col>
+                <Button size="large" type="primary" onClick={onAccess} disabled={!accessKey}>
+                  Enter <ArrowRightOutlined />
+                </Button>
+              </Col>
+            </Row>
           </div>
-          <Row align="middle" justify="space-between" gutter={20}>
-            <Col flex={1} style={{ border: '1px solid #53ab90', borderRadius: '25px' }}>
-              <Row>
-                <Col>
-                  <Select placeholder="Cloud vendor" defaultValue="aws" size="large" bordered={false} onChange={v => setCloudVendor(v)}>
-                    <Select.Option value='aws'>AWS</Select.Option>
-                  </Select>
-                </Col>
-                <Col flex={1}>
-                  <Input onChange={e => setAccessKey(e.target.value)} placeholder="Access key" bordered={false}
-                    size="large" style={{ borderRadius: '25px' }} />
-                </Col>
-              </Row>
-            </Col>
-            <Col>
-              <Button size="large" type="primary" onClick={onAccess} disabled={!accessKey}>
-                Enter <ArrowRightOutlined />
+        }
+      
+      </Modal>
+      <Modal visible={isPasswordModalOpen} footer={null}
+        onCancel={() => setIsPasswordModalOpen(false)}>
+        <div style={{ marginBottom: '25px', fontWeight: 600, fontSize: '18px' }}>
+          <span>Input your secret key to apply</span>
+        </div>  
+        <Row align="middle" justify="space-between" gutter={20}>
+          <Col flex={1} style={{ border: '1px solid #53ab90', borderRadius: '25px' }}>
+            <Input placeholder="Please input your secret key" size="large" type="password" autoFocus={true}
+              onChange={e => setInputedSecretKey(e.target.value)} defaultValue="" bordered={false} />
+          </Col>
+          <Col>
+            <Button type="primary" htmlType="submit" onClick={isOnApply ? onApply : onDestroy} size="large"
+              loading={isApplying || isDestroying} disabled={isApplying || isDestroying || !inputedSecretKey}>
+                {isOnApply ? 'Apply' : 'Destroy'}
               </Button>
-            </Col>
-          </Row>
-        </div>
-      }
-     
-    </Modal>
+          </Col>
+        </Row>
+      </Modal>
+    </>
   );
 }
 

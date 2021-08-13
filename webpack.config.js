@@ -9,7 +9,7 @@ const ENV = process.env.NODE_ENV || 'development';
 const context = __dirname;
 
 const NETWORK = process.env.OCT_NETWORK || 'testnet';
-const RELAY_CONTRACT_NAME = process.env.OCT_RELAY_CONTRACT_NAME || process.env.CONTRACT_NAME || 'dev-oct-relay.testnet';
+const RELAY_CONTRACT_NAME = process.env.OCT_RELAY_CONTRACT_NAME || process.env.CONTRACT_NAME || 'octopus-relay.testnet';
 const TOKEN_CONTRACT_NAME = process.env.OCT_TOKEN_CONTRACT_NAME || 'oct-token.testnet';
 const TOKEN_DECIMAL = process.env.OCT_TOKEN_DECIMAL || 24;
 
