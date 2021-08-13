@@ -270,12 +270,12 @@ function DeployModal({ appchain, visible, onCancel }): React.ReactElement {
     
     const { cloudVendor, accessKey, baseImage } = fields;
 
-    if (!cloudVendor || !accessKey || !baseImage) {
+    if (!cloudVendor || !accessKey) {
       return message.error('Missing parameters!');
     }
     setIsDeploying(true);
 
-    const { chain_spec_url, chain_spec_hash, boot_nodes } = appchain;
+    const { chain_spec_raw_url, chain_spec_raw_hash, boot_nodes } = appchain;
 
     try {
 
@@ -284,8 +284,8 @@ function DeployModal({ appchain, visible, onCancel }): React.ReactElement {
         url: `${apiHost}/api/tasks`,
         headers: { authorization: cloudVendorKey },
         data: {
-          chainspec_url: chain_spec_url,
-          chainspec_checksum: 'sha256:' + chain_spec_hash,
+          chainspec_url: chain_spec_raw_url,
+          chainspec_checksum: 'sha256:' + chain_spec_raw_hash,
           bootnodes: boot_nodes ? boot_nodes.replaceAll(/(\[|\]|")/g, '').split(',').filter(a => a.replaceAll(/\s/g, '')) : [],
           cloud_vendor: cloudVendor,
           access_key: accessKey,
