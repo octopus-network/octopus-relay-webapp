@@ -23,10 +23,6 @@ const baseImages = [
   {
     image: 'gcr.io/octopus-dev-309403/substrate-octopus@sha256:5b4694fa7bf522fee76ecd607a76e312b19757005977de4c7c0c2c9869e31934',
     label: 'Substrate 0.9.8'
-  },
-  {
-    image: '',
-    label: 'Default'
   }
 ]
 
@@ -447,7 +443,7 @@ function DeployModal({ appchain, visible, onCancel }): React.ReactElement {
  
   return (
     <>
-      <Modal visible={visible} title={false} onCancel={onCancel} 
+      <Modal visible={visible} title={false} onCancel={onCancel} zIndex={998}
         destroyOnClose={true} footer={null} width={modalWidth} style={{ transition: 'width .3s ease' }}>
       
         {
@@ -571,7 +567,7 @@ function DeployModal({ appchain, visible, onCancel }): React.ReactElement {
         }
       
       </Modal>
-      <Modal visible={isPasswordModalOpen} footer={null}
+      <Modal visible={isPasswordModalOpen} footer={null} destroyOnClose={true} zIndex={999}
         onCancel={() => setIsPasswordModalOpen(false)}>
         <div style={{ marginBottom: '25px', fontWeight: 600, fontSize: '18px' }}>
           <span>Input your secret key to apply</span>
