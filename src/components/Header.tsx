@@ -153,7 +153,7 @@ function Header(): React.ReactElement {
                 <a href='https://faucet.testnet.oct.network' target="_blank">Faucet</a>
               </Menu.Item>
               <Menu.Item key="docs">
-                <a href="https://docs.oct.network/en" target="_blank">
+                <a href="https://docs.oct.network" target="_blank">
                   Docs
                 </a>
               </Menu.Item>
