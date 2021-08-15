@@ -63,7 +63,7 @@ function StakeModal({ visible, appchainId, onCancel }): React.ReactElement {
       })
       .catch((err) => {
         setAppchainLoading(false);
-        message.error(err.toString());
+        // message.error(err.toString());
       });
   }, [visible, appchainId]);
 
@@ -96,7 +96,7 @@ function StakeModal({ visible, appchainId, onCancel }): React.ReactElement {
       })
       .catch((err) => {
         setIsSubmiting(false);
-        message.error(err.toString());
+        // message.error(err.toString());
       });
   };
 
@@ -120,7 +120,7 @@ function StakeModal({ visible, appchainId, onCancel }): React.ReactElement {
       })
       .catch((err) => {
         setIsSubmiting(false);
-        message.error(err.toString());
+        // message.error(err.toString());
       });
   };
 
@@ -132,7 +132,6 @@ function StakeModal({ visible, appchainId, onCancel }): React.ReactElement {
           appchain_id: id,
         },
         BOATLOAD_OF_GAS,
-        1
       )
       .then(() => {
         setUnstakeLoading(false);
@@ -140,7 +139,7 @@ function StakeModal({ visible, appchainId, onCancel }): React.ReactElement {
       })
       .catch((err) => {
         setUnstakeLoading(false);
-        message.error(err.toString());
+        // message.error(err.toString());
       });
   };
 

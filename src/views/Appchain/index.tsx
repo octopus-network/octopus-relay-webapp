@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useCallback } from "react";
 
 import { ApiPromise, WsProvider } from '@polkadot/api';
-import { formatBalance, u8aToHex } from '@polkadot/util';
+import { formatBalance, u8aToHex, stringToU8a } from '@polkadot/util';
 import { encodeAddress } from '@polkadot/util-crypto';
 
-import { utils } from "near-api-js";
+import { utils, providers } from "near-api-js";
 import {
   Row,
   Col,
@@ -17,7 +17,8 @@ import {
   Popconfirm,
   Empty,
   Tooltip,
-  notification
+  notification,
+  Spin
 } from "antd";
 
 import {
@@ -79,7 +80,49 @@ function Appchain(): React.ReactElement {
   const [stakeModalVisible, setStakeModalVisible] = useState(false);
   const [subqlModalVisible, setSubqlModalVisible] = useState(false);
 
+  const [errorMessage, setErrorMessage] = useState('');
+
   const [api, setApi] = useState<any>();
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const transactionHashes = urlParams.get('transactionHashes');
+
+  useEffect(() => {
+    if (!transactionHashes) {
+      return;
+    }
+    
+    const provider = new providers.JsonRpcProvider(
+      'https://archival-rpc.testnet.near.org'
+    );
+
+    provider.txStatus(transactionHashes, window.accountId).then(status => {
+      const { receipts_outcome } = status;
+      console.log(receipts_outcome);
+      let message = '';
+      for (let i = 0; i < receipts_outcome.length; i++) {
+        const { outcome } = receipts_outcome[i];
+        if ((outcome.status as any).Failure) {
+          message = JSON.stringify((outcome.status as any).Failure);
+          break;
+        }
+      }
+      setErrorMessage(message);
+    });
+
+  }, [transactionHashes]);
+
+  useEffect(() => {
+    if (!errorMessage) return;
+    notification.error({
+      message: 'Transaction Error',
+      description: `${errorMessage}`,
+      onClose: () => {
+        window.location.href = `/#/appchains/${id}`;
+      }
+    });
+    
+  }, [errorMessage]);
 
   const columns = [
     {
@@ -179,19 +222,6 @@ function Appchain(): React.ReactElement {
     }
     getValidators(currValidatorSetIdx);
   }, [currValidatorSetIdx]);
-
-  const onPrevIndex = useCallback(() => {
-    if (currValidatorSetIdx > 0) {
-      setCurrValidatorSetIdx(currValidatorSetIdx - 1);
-    }
-  }, [currValidatorSetIdx]);
-
-  const onNextIndex = useCallback(() => {
-    if (!appchain) return;
-    if (currValidatorSetIdx < appchainValidatorIdex) {
-      setCurrValidatorSetIdx(currValidatorSetIdx + 1);
-    }
-  }, [currValidatorSetIdx, appchain]);
 
   const gotoBlock = function (blockId) {
     utils.web
@@ -308,7 +338,7 @@ function Appchain(): React.ReactElement {
       })
       .catch((err) => {
         setIsRemoving(false);
-        message.error(err.toString());
+        // message.error(err.toString());
       });
   }
 
@@ -330,7 +360,7 @@ function Appchain(): React.ReactElement {
     })
     .catch((err) => {
       setIsApproving(false);
-      message.error(err.toString());
+      // message.error(err.toString());
     });
   }
 
@@ -348,7 +378,7 @@ function Appchain(): React.ReactElement {
     })
     .catch((err) => {
       setIsFreezing(false);
-      message.error(err.toString());
+      // message.error(err.toString());
     });
   }
 
@@ -366,7 +396,7 @@ function Appchain(): React.ReactElement {
     })
     .catch((err) => {
       setIsApproving(false);
-      message.error(err.toString());
+      // message.error(err.toString());
     });
   }
 

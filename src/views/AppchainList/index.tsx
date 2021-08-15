@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
 
-import { Button, message, Pagination, Empty, Col, Row } from "antd";
+import { Button, message, Pagination, Empty, Col, Row, notification } from "antd";
 import { PlusOutlined, RightOutlined, LoadingOutlined, GlobalOutlined } from "@ant-design/icons";
 
 import { Link, useNavigate } from "react-router-dom";
@@ -97,15 +97,18 @@ function AppchainList(): React.ReactElement {
 
         appchains?.length ?
         <>
-          {appchains.map(({ id, founder_id, validators, bond_tokens, status, subql_url }, idx) => {
-            
+          {appchains.map(({ id, founder_id, validators, status, subql_url }, idx) => {
+            const totalStaked = validators.reduce(
+              (total, b) => total + b.staked_amount,
+              0
+            );
             return (
               <Row key={idx} className={styles.appchain} justify="center" 
                 onClick={(e) => navigate(`/appchains/${id}`)} align="middle">
                 <Col span={4} className={styles.name}>{id}</Col>
                 <Col span={5}>{founder_id}</Col>
                 <Col span={5}>{validators.length}</Col>
-                <Col span={4}>{bond_tokens} OCT</Col>
+                <Col span={4}>{totalStaked} OCT</Col>
                 <Col span={4}>
                   <span className={`${styles.status} ${styles[status]}`}>
                     {status}
