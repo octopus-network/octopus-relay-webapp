@@ -515,7 +515,7 @@ function Appchain(): React.ReactElement {
                 className={classnames(styles.tag, styles.link)}
                 href={
                   window.contractName == 'octopus-relay.testnet' ? 
-                  `http://explorer.oct.network/?appchain=${id}` : 
+                  `http://explorer.testnet.oct.network/?appchain=${id}` : 
                   `http://explorer.dev.oct.network/?appchain=${id}`
                 }
                 target='_blank'
