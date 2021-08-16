@@ -34,9 +34,9 @@
     }
   },
   "ObservationsPayload": {
-    "public": "[u8; 30]",
+    "public": "[u8; 33]",
     "block_number": "BlockNumber",
-    "fact_sequence": "u64",
+    "next_fact_sequence": "u32",
     "observations": "Vec<Observation<AccountId>>"
   }
 }
