@@ -23,7 +23,6 @@ export async function initContract() {
 
   window.contractName = nearConfig.contractName;
   window.tokenContractName = nearConfig.tokenContract;
-  window.tokenDecimal = nearConfig.tokenDecimal;
 
   // Initializing our contract APIs by contract name and configuration
   window.contract = await new Contract(
@@ -85,13 +84,13 @@ export function login() {
 
 export function fromDecimals(numStr) {
   return new BigNumber(numStr)
-    .div(Math.pow(10, window.tokenDecimal))
+    .div(Math.pow(10, nearConfig.tokenDecimal))
     .toNumber();
 }
 
 export function toDecimals(num) {
   return new BigNumber(num)
-    .multipliedBy(10 ** window.tokenDecimal)
+    .multipliedBy(10 ** nearConfig.tokenDecimal)
     .toString(10);
 }
 
