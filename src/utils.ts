@@ -50,7 +50,7 @@ export async function initContract() {
         "remove_appchain",
         "pass_appchain",
         "appchain_go_staging",
-        "update_subql_url"
+        "update_subql_url",
       ],
     }
   );
@@ -83,11 +83,11 @@ export function login() {
 }
 
 export function fromDecimals(numStr) {
-  return new BigNumber(numStr).div(Math.pow(10, 24)).toNumber();
+  return new BigNumber(numStr).div(Math.pow(10, 18)).toNumber();
 }
 
 export function toDecimals(num) {
-  return new BigNumber(num).multipliedBy(10 ** 24).toString(10);
+  return new BigNumber(num).multipliedBy(10 ** 18).toString(10);
 }
 
 export function readableAppchain(appchain) {
