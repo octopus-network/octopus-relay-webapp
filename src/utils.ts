@@ -2,7 +2,7 @@
 
 import { connect, Contract, keyStores, WalletConnection } from "near-api-js";
 import { BigNumber } from "bignumber.js";
-BigNumber.set({ DECIMAL_PLACES: nearConfig.tokenDecimal });
+BigNumber.set({ DECIMAL_PLACES: Number(nearConfig.tokenDecimal) });
 
 // Initialize contract & set global variables
 export async function initContract() {
@@ -84,13 +84,13 @@ export function login() {
 
 export function fromDecimals(numStr) {
   return new BigNumber(numStr)
-    .div(Math.pow(10, nearConfig.tokenDecimal))
+    .div(Math.pow(10, Number(nearConfig.tokenDecimal)))
     .toNumber();
 }
 
 export function toDecimals(num) {
   return new BigNumber(num)
-    .multipliedBy(10 ** nearConfig.tokenDecimal)
+    .multipliedBy(10 ** Number(nearConfig.tokenDecimal))
     .toString(10);
 }
 
