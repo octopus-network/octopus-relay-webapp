@@ -9,9 +9,9 @@ const ENV = process.env.NODE_ENV || 'development';
 const context = __dirname;
 
 const NETWORK = process.env.OCT_NETWORK || 'testnet';
-const RELAY_CONTRACT_NAME = process.env.OCT_RELAY_CONTRACT_NAME || process.env.CONTRACT_NAME || 'octopus-relay.testnet';
-const TOKEN_CONTRACT_NAME = process.env.OCT_TOKEN_CONTRACT_NAME || 'oct-token.testnet';
-const TOKEN_DECIMAL = process.env.OCT_TOKEN_DECIMAL || 24;
+const RELAY_CONTRACT_NAME = process.env.OCT_RELAY_CONTRACT_NAME || process.env.CONTRACT_NAME || 'dev.dev_oct_relay.testnet';
+const TOKEN_CONTRACT_NAME = process.env.OCT_TOKEN_CONTRACT_NAME || 'oct.dev_oct_relay.testnet';
+const TOKEN_DECIMAL = process.env.OCT_TOKEN_DECIMAL || 18;
 
 module.exports = merge(
   baseConfig(ENV, context),
@@ -28,7 +28,7 @@ module.exports = merge(
           helperUrl: `https://helper.${NETWORK}.near.org`,
           explorerUrl: `https://explorer.${NETWORK}.near.org`,
           tokenContract: TOKEN_CONTRACT_NAME,
-          tokenDecimal: 24
+          tokenDecimal: TOKEN_DECIMAL,
         }),
         inject: true,
         template: path.join(context, 'src/index.html')

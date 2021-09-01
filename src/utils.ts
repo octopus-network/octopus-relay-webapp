@@ -83,11 +83,15 @@ export function login() {
 }
 
 export function fromDecimals(numStr) {
-  return new BigNumber(numStr).div(Math.pow(10, 18)).toNumber();
+  return new BigNumber(numStr)
+    .div(Math.pow(10, window.tokenDecimal))
+    .toNumber();
 }
 
 export function toDecimals(num) {
-  return new BigNumber(num).multipliedBy(10 ** 18).toString(10);
+  return new BigNumber(num)
+    .multipliedBy(10 ** window.tokenDecimal)
+    .toString(10);
 }
 
 export function readableAppchain(appchain) {
