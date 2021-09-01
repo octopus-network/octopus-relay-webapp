@@ -23,6 +23,7 @@ export async function initContract() {
 
   window.contractName = nearConfig.contractName;
   window.tokenContractName = nearConfig.tokenContract;
+  window.tokenDecimal = nearConfig.tokenDecimal;
 
   // Initializing our contract APIs by contract name and configuration
   window.contract = await new Contract(
