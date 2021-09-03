@@ -96,10 +96,7 @@ export function toDecimals(num) {
 
 export function readableAppchain(appchain) {
   return Object.assign(appchain, {
-    bond_tokens: fromDecimals(appchain.bond_tokens),
-    validators: appchain.validators.map((v) =>
-      Object.assign(v, { staked_amount: fromDecimals(v.staked_amount) })
-    ),
+    bond_tokens: fromDecimals(appchain.bond_tokens)
   });
 }
 

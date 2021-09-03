@@ -6,7 +6,7 @@ import { PlusOutlined, RightOutlined, LoadingOutlined, GlobalOutlined } from "@a
 import { Link, useNavigate } from "react-router-dom";
 import styles from "./styles.less";
 
-import { readableAppchains } from "../../utils";
+import { fromDecimals, readableAppchains } from "../../utils";
 
 function AppchainList(): React.ReactElement {
   const navigate = useNavigate();
@@ -16,8 +16,7 @@ function AppchainList(): React.ReactElement {
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const [appchainId, setAppchainId] = useState<number>(0);
-  const [page, setPage] = useState(0);
+  const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [totalCount, setTotalCount] = useState(0);
 
@@ -28,6 +27,7 @@ function AppchainList(): React.ReactElement {
       from_index: start,
       limit: pageSize,
     });
+   
     const list = readableAppchains(res);
     const t = [];
     list.map((item, id) => {
@@ -97,18 +97,20 @@ function AppchainList(): React.ReactElement {
 
         appchains?.length ?
         <>
-          {appchains.map(({ id, founder_id, validators, status, subql_url }, idx) => {
-            const totalStaked = validators.reduce(
-              (total, b) => total + b.staked_amount,
-              0
-            );
-            return (
+          {appchains.map(({ 
+            id, 
+            founder_id, 
+            validators_len, 
+            staked_balance,
+            status, 
+            subql_url 
+          }, idx) => (
               <Row key={idx} className={styles.appchain} justify="center" 
                 onClick={(e) => navigate(`/appchains/${id}`)} align="middle">
                 <Col span={4} className={styles.name}>{id}</Col>
                 <Col span={5}>{founder_id}</Col>
-                <Col span={5}>{validators.length}</Col>
-                <Col span={4}>{totalStaked} OCT</Col>
+                <Col span={5}>{validators_len}</Col>
+                <Col span={4}>{fromDecimals(staked_balance)} OCT</Col>
                 <Col span={4}>
                   <span className={`${styles.status} ${styles[status]}`}>
                     {status}
@@ -131,8 +133,8 @@ function AppchainList(): React.ReactElement {
                   </Row>
                 </Col>
               </Row>
-            );
-          })}
+            )
+          )}
           {
             appchains?.length > pageSize &&
             <Row justify="center" style={{ marginTop: 30 }}>

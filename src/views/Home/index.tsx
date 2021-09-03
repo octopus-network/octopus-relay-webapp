@@ -40,39 +40,39 @@ function Home(): React.ReactElement {
 
         const appchains = readableAppchains(oAppchains);
 
-        appchains.sort((a, b) => {
-          const statusRank = {
-            Active: 99,
-            InProgress: 98,
-            Frozen: 97,
-            Broken: 0,
-          };
-          const validators0 = a.validators,
-            validators1 = b.validators;
-          const totalStaked0 = validators0.reduce(
-              (total, b) => total + b.staked_amount,
-              0
-            ),
-            totalStaked1 = validators1.reduce(
-              (total, b) => total + b.staked_amount,
-              0
-            );
+        // appchains.sort((a, b) => {
+        //   const statusRank = {
+        //     Active: 99,
+        //     InProgress: 98,
+        //     Frozen: 97,
+        //     Broken: 0,
+        //   };
+        //   const validators0 = a.validators,
+        //     validators1 = b.validators;
+        //   const totalStaked0 = validators0.reduce(
+        //       (total, b) => total + b.staked_amount,
+        //       0
+        //     ),
+        //     totalStaked1 = validators1.reduce(
+        //       (total, b) => total + b.staked_amount,
+        //       0
+        //     );
 
-          // sort
-          if (a.status == b.status) {
-            if (validators0.length == validators1.length) {
-              if (totalStaked0 == totalStaked1) {
-                return b.id - a.id;
-              } else {
-                return totalStaked1 - totalStaked0;
-              }
-            } else {
-              return validators1.length - validators0.length;
-            }
-          } else {
-            return statusRank[b.status] - statusRank[a.status];
-          }
-        });
+        //   // sort
+        //   if (a.status == b.status) {
+        //     if (validators0.length == validators1.length) {
+        //       if (totalStaked0 == totalStaked1) {
+        //         return b.id - a.id;
+        //       } else {
+        //         return totalStaked1 - totalStaked0;
+        //       }
+        //     } else {
+        //       return validators1.length - validators0.length;
+        //     }
+        //   } else {
+        //     return statusRank[b.status] - statusRank[a.status];
+        //   }
+        // });
 
         setAppchains(appchains.slice(0,5));
       })
@@ -161,11 +161,8 @@ function Home(): React.ReactElement {
               </>
             ) : appchains && appchains.length ? (
               appchains.map((item, idx) => {
-                const { id, appchain_name, validators, status } = item;
-                const totalStaked = validators.reduce(
-                  (total, b) => total + b.staked_amount,
-                  0
-                );
+                const { id, status, staked_balance, validators_len } = item;
+                
                 return (
                   <Row
                     className={styles.appchain}
@@ -176,8 +173,8 @@ function Home(): React.ReactElement {
                       {/* <i className={styles.id}>{idx + 1}</i> */}
                       <span className={styles.name}>{id}</span>
                     </Col>
-                    <Col span={5}>{validators.length}</Col>
-                    <Col span={4}>{totalStaked} OCT</Col>
+                    <Col span={5}>{validators_len}</Col>
+                    <Col span={4}>{fromDecimals(staked_balance)} OCT</Col>
                     <Col span={4}>
                       <Row justify="end">
                         <span className={`${styles.status} ${styles[status]}`}>

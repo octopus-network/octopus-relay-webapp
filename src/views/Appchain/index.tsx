@@ -18,7 +18,7 @@ import {
   Empty,
   Tooltip,
   notification,
-  Spin
+  Pagination
 } from "antd";
 
 import {
@@ -43,7 +43,7 @@ import { CopyToClipboard } from "react-copy-to-clipboard";
 import classnames from "classnames";
 
 import styles from "./styles.less";
-import { readableAppchain } from "../../utils";
+import { readableAppchain, fromDecimals } from "../../utils";
 
 import BlockTable from './BlockTable';
 import RPCModal from './RPCModal';
@@ -69,10 +69,7 @@ function Appchain(): React.ReactElement {
   const [isLoadingValidators, setIsLoadingValidators] = useState<boolean>(
     false
   );
-  const [currValidatorSetIdx, setCurrValidatorSetIdx] = useState<number>(0);
-  const [appchainValidatorIdex, setAppchainValidatorIdx] = useState<number>(0);
-  const [validatorSet, setValidatorSet] = useState<any>();
-
+  
   const [rpcModalVisible, setRPCModalVisible] = useState(false);
   const [deployModalVisible, setDeployModalVisible] = useState(false);
   const [approveModalVisible, setApproveModalVisible] = useState(false);
@@ -83,9 +80,27 @@ function Appchain(): React.ReactElement {
   const [errorMessage, setErrorMessage] = useState('');
 
   const [api, setApi] = useState<any>();
-
   const urlParams = new URLSearchParams(window.location.search);
   const transactionHashes = urlParams.get('transactionHashes');
+
+  const [validators, setValidators] = useState([]);
+  const [validatorsPage, setValidatorsPage] = useState(1);
+  const [validatorsPageSize, setValidatorsPageSize]= useState(20);
+
+  useEffect(() => {
+    setIsLoadingValidators(true);
+    window.contract
+      .get_validators({
+        appchain_id: id,
+        start: (validatorsPage - 1 ) * validatorsPageSize,
+        limit: validatorsPageSize
+      }).then(validators => {
+        console.log(validators);
+        setValidators(validators);
+      }).finally(() => {
+        setIsLoadingValidators(false);
+      });
+  }, [validatorsPage, validatorsPageSize, id]);
 
   useEffect(() => {
     if (!transactionHashes) {
@@ -124,7 +139,7 @@ function Appchain(): React.ReactElement {
     
   }, [errorMessage]);
 
-  const columns = [
+  const validatorColumns = [
     {
       title: "Account",
       dataIndex: "account_id",
@@ -172,7 +187,7 @@ function Appchain(): React.ReactElement {
       title: "Staked Amount",
       dataIndex: "staked_amount",
       render: (value) => {
-        return <span>{value}</span>;
+        return <span>{fromDecimals(value)}</span>;
       },
     },
     {
@@ -186,42 +201,30 @@ function Appchain(): React.ReactElement {
 
   useEffect(() => {
     setIsLoading(true);
-    
-    Promise.all([
-      window.contract.get_appchain({ appchain_id: id }),
-      window.contract.get_curr_validator_set_len({ appchain_id: id }),
-    ]).then(([appchain, idx]) => {
-      console.log(appchain);
-      setIsLoading(false);
-      setAppchain(readableAppchain(appchain));
-      setCurrValidatorSetIdx(idx);
-      setAppchainValidatorIdx(idx);
-      if (appchain.status == 'Booting') {
-        initAppchain(appchain);
-      }
-    });
-  }, [id]);
-
-  const getValidators = function (idx) {
-    setIsLoadingValidators(true);
     window.contract
-      .get_validator_set({ appchain_id: appchain.id, seq_num: idx })
-      .then((set) => {
-        setIsLoadingValidators(false);
-        setValidatorSet(set);
-      })
-      .catch((err) => {
-        setIsLoadingValidators(false);
-        message.error(err.toString());
+      .get_appchain({ appchain_id: id })
+      .then(appchain => {
+        console.log(appchain);
+        setIsLoading(false);
+        setAppchain(readableAppchain(appchain));
+        if (appchain.status == 'Booting') {
+          initAppchain(appchain);
+        }
       });
-  };
-
-  useEffect(() => {
-    if (currValidatorSetIdx == 0) {
-      return setValidatorSet([]);
-    }
-    getValidators(currValidatorSetIdx);
-  }, [currValidatorSetIdx]);
+    // Promise.all([
+    //   window.contract.get_appchain({ appchain_id: id }),
+    //   window.contract.get_curr_validator_set_len({ appchain_id: id }),
+    // ]).then(([appchain, idx]) => {
+    //   console.log(appchain);
+    //   setIsLoading(false);
+    //   setAppchain(readableAppchain(appchain));
+    //   setCurrValidatorSetIdx(idx);
+    //   setAppchainValidatorIdx(idx);
+    //   if (appchain.status == 'Booting') {
+    //     initAppchain(appchain);
+    //   }
+    // });
+  }, [id]);
 
   const gotoBlock = function (blockId) {
     utils.web
@@ -786,12 +789,20 @@ function Appchain(): React.ReactElement {
           </Tabs.TabPane>
           <Tabs.TabPane tab="Validators" key="validators">
             <Table
-              columns={columns}
-              rowKey={(record) => record.account_id}
+              columns={validatorColumns}
+              rowKey={(record) => `${record.account_id}_${record.id}`}
               loading={isLoading || isLoadingValidators}
-              dataSource={appchain?.validators}
+              dataSource={validators}
               pagination={false}
             />
+            {
+              appchain?.validators_len > validatorsPageSize &&
+              <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'flex-end' }}>
+              <Pagination current={validatorsPage} pageSize={validatorsPageSize} 
+                onChange={setValidatorsPage} showSizeChanger={false} total={appchain?.validators_len} /> 
+              </div>
+            }
+            
           </Tabs.TabPane>
         </Tabs>
       </div>
