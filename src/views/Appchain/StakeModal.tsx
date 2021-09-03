@@ -30,6 +30,7 @@ function StakeModal({ visible, appchainId, onCancel }): React.ReactElement {
   const [appchainLoading, setAppchainLoading] = useState<boolean>(false);
   const [isSubmiting, setIsSubmiting] = useState<boolean>();
   const [unstakeLoading, setUnstakeLoading] = useState<boolean>(false);
+  const [accountExist, setAccountExist] = useState(false);
 
   const [accountBalance, setAccountBalance] = useState(0);
   const [stakingAmount, setStakingAmount] = useState(0);
@@ -37,6 +38,16 @@ function StakeModal({ visible, appchainId, onCancel }): React.ReactElement {
   const [form] = Form.useForm();
 
   useEffect(() => {
+    
+    window.contract
+      ?.account_exists({
+        account_id: window.accountId,
+        appchain_id: appchainId
+      })
+      .then(exist => {
+        setAccountExist(exist);
+      });
+
     window.tokenContract
       ?.ft_balance_of({
         account_id: window.accountId,
@@ -44,7 +55,7 @@ function StakeModal({ visible, appchainId, onCancel }): React.ReactElement {
       .then((data) => {
         setAccountBalance(data);
       });
-  }, [visible]);
+  }, [visible, window.accountId, appchainId]);
 
   useEffect(() => {
     if (!visible) return;
@@ -152,7 +163,7 @@ function StakeModal({ visible, appchainId, onCancel }): React.ReactElement {
       footer={null}
     >
       <Spin spinning={appchainLoading}>
-        {appchain?.validators.some((v) => v.account_id == window.accountId) ? (
+        {accountExist ? (
           <div>
             <Form
               onFinish={onStakeMore}
