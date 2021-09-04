@@ -121,7 +121,7 @@ function AppchainList(): React.ReactElement {
                     {
                       status == 'Booting' && subql_url ?
                       <Button shape="circle" icon={<GlobalOutlined />} href={
-                          window.contractName == 'octopus-relay.testnet' ? 
+                          window.contractName == 'beta.beta_oct_relay.testnet' ? 
                           `http://explorer.testnet.oct.network/?appchain=${id}` : 
                           `http://explorer.dev.oct.network/?appchain=${id}`
                         } target="_blank" style={{ marginRight: 10, border: 'none' }} /> :
