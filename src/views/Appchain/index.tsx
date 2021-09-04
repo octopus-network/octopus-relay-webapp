@@ -69,6 +69,13 @@ function Appchain(): React.ReactElement {
   const [isLoadingValidators, setIsLoadingValidators] = useState<boolean>(
     false
   );
+
+  const isAdmin = window.accountId && (
+    new RegExp(`\.${window.accountId}`).test(window.contractName) ||
+    window.accountId === window.contractName
+  );
+
+  const isOwner = window.accountId && appchain?.founder_id === window.accountId;
   
   const [rpcModalVisible, setRPCModalVisible] = useState(false);
   const [deployModalVisible, setDeployModalVisible] = useState(false);
@@ -429,7 +436,7 @@ function Appchain(): React.ReactElement {
         </div>
         <div className={styles.right}>
           {
-            window.accountId == window.contractName ?
+            isAdmin ?
             <div className={styles.buttons}>
               {
                 appchain?.status == 'Auditing' ?
@@ -469,7 +476,7 @@ function Appchain(): React.ReactElement {
             </div> :
             <div className={styles.buttons}>
               {
-                appchain?.founder_id == window.accountId ?
+                isOwner ?
                 appchain?.status != 'Auditing' &&
                 (
                   <Link to={`/update/${id}`}>
@@ -745,7 +752,7 @@ function Appchain(): React.ReactElement {
             <em className={styles.desc}>Total Issuance</em>
           </div>
           </> :
-          window.accountId == appchain?.founder_id && appchain?.status == 'Auditing' ?
+          isOwner && appchain?.status == 'Auditing' ?
           <div style={{ flex: 1, alignItems: 'center', display: 'flex', justifyContent: 'center' }}>
             <Result
               title="Your appchain registration is in process"
@@ -771,7 +778,7 @@ function Appchain(): React.ReactElement {
       </div>
       <div className={styles.explorer} style={{ 
         marginTop: '30px', 
-        display: window.accountId == appchain?.founder_id && appchain?.status == 'Auditing' ? 'none' : 'block'
+        display: isOwner && appchain?.status == 'Auditing' ? 'none' : 'block'
       }}>
         <Tabs defaultActiveKey={tab || 'blocks'} onChange={onTabChange}>
           <Tabs.TabPane tab="Blocks" key="blocks">
