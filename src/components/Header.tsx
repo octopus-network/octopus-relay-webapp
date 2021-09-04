@@ -144,7 +144,7 @@ function Header(): React.ReactElement {
               </Menu.Item>
               <Menu.Item key="bridge">
                 <a href={
-                  window.contractName == 'octopus-relay.testnet' ? 
+                  window.contractName == 'beta.beta_oct_relay.testnet' ? 
                   'https://bridge.testnet.oct.network' : 
                   'https://bridge.dev.oct.network'} 
                   target="_blank">Bridge</a>
