@@ -16,6 +16,7 @@ const apiHost = 'https://1fus85rip4.execute-api.ap-northeast-1.amazonaws.com';
 const wsHost = 'wss://chuubnzu9i.execute-api.ap-northeast-1.amazonaws.com';
 
 function getCloudVendorKey(appchainId, cloudVendor, accessKey) {
+  appchainId = appchainId.replaceAll('-', '_');
   return `appchain-${appchainId}-cloud-${cloudVendor}-${accessKey}`;
 }
 
@@ -218,7 +219,6 @@ function DeployModal({ appchain, visible, onCancel }): React.ReactElement {
 
   const onAccess = () => {
     let vendorKey = getCloudVendorKey(appchain.id, cloudVendor, accessKey);
-
     window.localStorage.setItem(getLocalStorageKey(appchain.id), vendorKey);
     setCloudVendorKey(vendorKey);
     setModalWidth(bigWidth);
