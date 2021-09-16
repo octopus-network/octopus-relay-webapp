@@ -44,7 +44,6 @@ import RPCModal from './RPCModal';
 import DeployModal from './DeployModal';
 import ActivateModal from "./ActivateModal";
 import SubqlModal from "./SubqlModal";
-import StakeModal from "./StakeModal";
 
 import styles from './styles.less';
 
@@ -573,7 +572,7 @@ const Overview = () => {
     {/* <ApproveModal visible={approveModalVisible} appchainId={appchain?.id} onCancel={() => setApproveModalVisible(false)} /> */}
     <ActivateModal visible={activateModalVisible} appchainId={appchain?.id} onCancel={() => setActivateModalVisible(false)} />
     <SubqlModal subqlUrl={appchain?.subql_url || ''} visible={subqlModalVisible} appchainId={appchain?.id} onCancel={() => setSubqlModalVisible(false)} />
-    <StakeModal visible={stakeModalVisible} appchainId={appchain?.id} onCancel={() => setStakeModalVisible(false)} />
+    
     </>
   );
 }

@@ -22,7 +22,9 @@ import { utils, providers } from "near-api-js";
 import { encodeAddress } from '@polkadot/util-crypto';
 import { useLocation } from "react-router-dom";
 import { CopyToClipboard } from "react-copy-to-clipboard";
-import { readableAppchain, fromDecimals } from "../../../utils";
+import { readableAppchain, fromDecimals, login } from "../../../utils";
+
+import StakeModal from "./StakeModal";
 
 const Validators = () => {
   const [appchain, setAppchain] = useState<any>();
@@ -37,6 +39,7 @@ const Validators = () => {
   const [validatorsPageSize, setValidatorsPageSize]= useState(10);
   const [appchainInitialized, setAppchainInitialized] = useState(false);
 
+  const [stakeModalVisible, setStakeModalVisible] = useState(false);
   const [validatorCount, setValidatorCount] = useState();
   const [delegatorCount, setDelegatorCount] = useState();
   const [currentEra, setCurrentEra] = useState();
@@ -74,10 +77,7 @@ const Validators = () => {
           initAppchain(appchain);
         }
       });
-    initAppchain({
-      id: 'barnacle-beta',
-      rpc_endpoint: 'wss://gateway.testnet.octopus.network/barnacle-beta/37be0f1f31c10d5145289e66cd0e04fd'
-    });
+   
   }, [id]);
 
   useEffect(() => {
@@ -210,6 +210,7 @@ const Validators = () => {
   ];
   
   return (
+    <>
     <Row gutter={[20, 20]}>
       <Col span={17}>
         <Card title="Overview">
@@ -244,18 +245,32 @@ const Validators = () => {
       </Col>
       <Col span={7}>
         <Card title="Actions" bordered={false}>
-          <div style={{
-            display: 'flex',
-            alignItems: 'center'
-          }}>
-            <span>Validator Rewards: {0} BAR</span>
-            <Button type="primary" style={{ marginLeft: '20px' }}>
-              Get rewards
+          {
+            isValidator ?
+            <div style={{
+              display: 'flex',
+              alignItems: 'center'
+            }}>
+              <span>Validator Rewards: {0} BAR</span>
+              <Button type="primary" style={{ marginLeft: '20px' }}>
+                Get rewards
+              </Button>
+            </div> :
+            window.accountId ?
+            <Button onClick={() => setStakeModalVisible(true)}
+              disabled={!(appchain?.status == 'Booting' || appchain?.status == 'Staging')}>
+              Stake
+            </Button> :
+            <Button onClick={login} type="primary">
+              Login to Stake
             </Button>
-          </div>
+          }
+          
         </Card>
       </Col>
     </Row>
+    <StakeModal visible={stakeModalVisible} appchainId={appchain?.id} onCancel={() => setStakeModalVisible(false)} />
+    </>
   );
 }
 
