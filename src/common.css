@@ -36,6 +36,13 @@ p {
   box-sizing: border-box;
 }
 
+.header-full {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+}
+
 .ant-table-thead th {
   color: #9c9c9c!important;
   font-weight: normal!important;
@@ -82,7 +89,12 @@ p {
 
 .ant-tabs-tabpane {
   background: #fff;
-  
+}
+
+.ant-menu-inline > .ant-menu-item {
+  height: 45px!important;
+  line-height: 45px!important;
+  margin: 0!important;
 }
 
 @keyframes append {

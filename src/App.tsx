@@ -11,6 +11,8 @@ import Update from './views/Update';
 
 import AppchainList from './views/AppchainList';
 import Appchain from './views/Appchain';
+import AppchainOverview from './views/Appchain/Overview';
+import AppchainValidators from './views/Appchain/Validators';
 
 function App(): React.ReactElement {
   return (
@@ -24,8 +26,10 @@ function App(): React.ReactElement {
             <Route path='appchains/register' element={<Register />} />
             <Route path='update/:id' element={<Update />} />
             <Route path='appchains' element={<AppchainList />} />
-            <Route path='appchains/:id' element={<Appchain />} />
-            <Route path='appchains/:id/:tab' element={<Appchain />} />
+            <Route path='appchains/:id' element={<Appchain />}>
+              <Route path='' element={<AppchainOverview />} />
+              <Route path='validators' element={<AppchainValidators />} />
+            </Route>
           </Route>
           
         </Routes>

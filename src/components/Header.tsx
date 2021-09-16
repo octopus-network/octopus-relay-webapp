@@ -23,7 +23,7 @@ const Wrapper = styled.div`
     align-items: center;
     .logo {
       display: inline-block;
-      width: 130px;
+      width: 100px;
       img {
         display: block;
         width: 100%;
@@ -31,7 +31,6 @@ const Wrapper = styled.div`
       }
     }
     .menu {
-      margin-left: 50px;
       .ant-menu-item {
         border-bottom: none;
         a {
@@ -84,6 +83,7 @@ function Header(): React.ReactElement {
   const location = useLocation();
 
   let pathname = location.pathname.split("/")[1];
+  const isInAppchain = /^\/appchains\/.*$/i.test(location.pathname);
 
   const menu = (
     <Menu>
@@ -125,12 +125,14 @@ function Header(): React.ReactElement {
         background: pathname == "home" ? "transparent" : "#030e21",
       }}
     >
-      <div className="container">
+      <div className={ isInAppchain ? 'header-full' : 'container' }>
         <div className="left">
           <Link to="/" className="logo">
             <img src={logo} />
           </Link>
-          <div className="menu">
+          <div className="menu" style={{
+            marginLeft: isInAppchain ? '80px' : '60px'
+          }}>
             <Menu
               mode="horizontal"
               style={{ borderBottom: "none", background: "transparent" }}
@@ -169,15 +171,7 @@ function Header(): React.ReactElement {
                 flexDirection: "row",
               }}
             >
-              {/* <Dropdown overlay={menu}>
-                <div>
-                  <span><UserOutlined /> { window.accountId }</span>
-                  <span style={{ marginLeft: "5px", color: "#9c9c9c" }}>
-                    <CaretDownOutlined />
-                  </span>
-                </div>
-              </Dropdown>
-              <span style={{ marginLeft: "10px", color: "#6c6c6c" }}>{accountBalance} <TokenBadge /></span> */}
+             
               <Dropdown
                 overlay={menu}
                 placement="bottomRight"

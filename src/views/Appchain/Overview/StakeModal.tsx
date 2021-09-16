@@ -21,9 +21,9 @@ const BOATLOAD_OF_GAS = Big(3)
   .times(10 ** 14)
   .toFixed();
 
-import TokenBadge from "../../components/TokenBadge";
+import TokenBadge from "../../../components/TokenBadge";
 
-import { toDecimals, fromDecimals } from "../../utils";
+import { toDecimals, fromDecimals } from "../../../utils";
 
 function StakeModal({ visible, appchainId, onCancel }): React.ReactElement {
   const [appchain, setAppchain] = useState<any>();
@@ -38,7 +38,7 @@ function StakeModal({ visible, appchainId, onCancel }): React.ReactElement {
   const [form] = Form.useForm();
 
   useEffect(() => {
-    
+    if (!appchainId) return;
     window.contract
       ?.account_exists({
         account_id: window.accountId,

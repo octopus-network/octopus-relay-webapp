@@ -5,7 +5,7 @@ import { ClockCircleOutlined } from '@ant-design/icons';
 
 import { Link, useNavigate } from 'react-router-dom';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
-import Hash from '../../components/Hash';
+import Hash from '../../../components/Hash';
 
 function getHeaderByBlockNumber(api, num) {
   

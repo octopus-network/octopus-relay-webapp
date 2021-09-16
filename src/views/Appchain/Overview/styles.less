@@ -1,0 +1,131 @@
+
+.skeleton:empty {
+  display: inline-block;
+  border-radius: 3px;
+  background: #eee;
+}
+
+.chainStates {
+  display: flex;
+  padding: 20px;
+  background: #fff;
+ 
+  .statistic {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    &:not(:last-child) {
+      border-right: 1px solid #eee;
+    }
+    .num {
+      font-size: 26px;
+      font-weight: 500;
+    }
+    .desc {
+      font-size: 13px;
+      color: #9c9c9c;
+      font-style: normal;
+    }
+  }
+}
+
+.explorer {
+  padding: 20px;
+  background: #fff;
+ 
+}
+
+.loading {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  :global {
+    .anticon {
+      font-size: 32px;
+    }
+  }
+}
+
+.deployLog {
+  margin-top: 20px;
+  padding: 15px;
+  border-radius: 3px;
+  overflow-y: auto;
+  background: #1c1c1c;
+  color: #fff;
+  height: 320px;
+}
+
+.logLine {
+  margin-bottom: 8px!important;
+  line-height: 16px;
+}
+
+.descriptionItemRow {
+  flex: 1;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  max-width: 180px;
+  color: #000;
+  &:hover {
+    color: #53ab90;
+  }
+}
+
+.baseInfo {
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  .tag {
+    display: inline-block;
+    height: 24px;
+    line-height: 24px;
+    padding: 0px 10px;
+    border-radius: 5px;
+    font-size: 13px;
+    background: rgba(6, 189, 188, 0.1);
+    color: #1c1c1c;
+    margin-right: 10px;
+    margin-bottom: 10px;
+    &.id, &.link:hover {
+      background: #53ab90;
+      color: #fff;
+      transition: none;
+    }
+    &.block {
+      color: #06bdbc;
+    }
+    &:empty {
+      background: #eee;
+      width: 100px;
+    }
+  }
+}
+
+.buttons {
+  display: flex;
+  :global {
+    .ant-btn {
+      margin-right: 10px;
+    }
+  }
+}
+
+.deployLog {
+  margin-top: 20px;
+  padding: 15px;
+  border-radius: 3px;
+  overflow-y: auto;
+  background: #1c1c1c;
+  color: #fff;
+  height: 320px;
+}
+
+.logLine {
+  margin-bottom: 8px!important;
+  line-height: 16px;
+}
