@@ -77,6 +77,14 @@ const Validators = () => {
           initAppchain(appchain);
         }
       });
+    window.contract
+      ?.account_exists({
+        account_id: window.accountId,
+        appchain_id: id
+      })
+      .then(exist => {
+        setIsValidator(exist);
+      });
    
   }, [id]);
 
@@ -115,7 +123,7 @@ const Validators = () => {
         setAppchainInitialized(true);
         setApi(api);
         // subscriptions
-        
+        console.log(api.query.octopusLpos);
         subscriptions.current.push(
           await api.query.octopusLpos.counterForValidators((count: any) => {
             setValidatorCount(count.toNumber());
