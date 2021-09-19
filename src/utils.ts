@@ -1,15 +1,17 @@
 //@ts-nocheck
 
-import { connect, Contract, keyStores, WalletConnection } from "near-api-js";
+import { connect, Contract, keyStores, WalletConnection, InMemorySigner, utils } from "near-api-js";
 import { BigNumber } from "bignumber.js";
 BigNumber.set({ DECIMAL_PLACES: Number(nearConfig.tokenDecimal) });
 
 // Initialize contract & set global variables
 export async function initContract() {
   // Initialize connection to the NEAR testnet
+
+  const keyStore = new keyStores.BrowserLocalStorageKeyStore();
   const near = await connect(
     Object.assign(
-      { deps: { keyStore: new keyStores.BrowserLocalStorageKeyStore() } },
+      { deps: { keyStore } },
       nearConfig
     )
   );
