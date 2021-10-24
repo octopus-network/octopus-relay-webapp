@@ -1,3 +1,4 @@
+*moved to https://github.com/octopus-network/octopus-webapp*
 # Octopus Relay Webapp
 
 [![Netlify Status](https://api.netlify.com/api/v1/badges/a62ea403-951b-43c4-a8c0-73fe8745565c/deploy-status)](https://app.netlify.com/sites/vigilant-mcclintock-590240/deploys)
